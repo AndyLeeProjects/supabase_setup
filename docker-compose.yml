@@ -12,9 +12,9 @@ services:
       - "8501:8501"
     environment:
       # For nginx-proxy integration (if you want to use your existing reverse proxy)
-      - VIRTUAL_HOST=${VIRTUAL_HOST:-master-data.yourdomain.com}
+      - VIRTUAL_HOST=${VIRTUAL_HOST:-app.practices.fyi}
       - VIRTUAL_PORT=8501
-      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST:-master-data.yourdomain.com}
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST:-app.practices.fyi}
       - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-your-email@domain.com}
       # Database connection environment variables
       # These should be set in your .env file or passed at runtime
@@ -40,6 +40,7 @@ services:
       - ./utils:/app/utils:ro
     networks:
       - master-data-network
+      - default  # Connect to existing nginx-proxy network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
       interval: 30s
@@ -50,7 +51,6 @@ services:
 networks:
   master-data-network:
     driver: bridge
-  # Uncomment to connect to existing reverse proxy network
-  # default:
-  #   external:
-  #     name: your-existing-network-name
+  default:
+    external: true
+    name: bridge  # Use default Docker bridge network where nginx-proxy runs
