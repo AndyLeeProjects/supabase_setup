@@ -1,0 +1,189 @@
+Patient's ID,Patient's ID (Guid),Referred In By First Name,Referred In By Last Name,Referred In By Postal Code,Referred In By Type Code,Referred In By Type Description,Referred In By Website,Referred In By Greeting,Referred In By City,Patient's Entry Date,Treatment Start Date,Patient's Name (First Last),Last Appointment Date,Patient Has a Future Appointment,Last Appointment Status Code,Last Appointment Status Description,Full Name
+60796,{8424CBA4-4600-4973-A839-A30B8DAC4DF7},,,,,,,,,8/10/2006 12:00 AM,10/1/2025 12:00 AM,Judy Law,10/14/2025 12:00 AM,Yes,D,Dismissed, 
+101203,{85782CB1-915B-47EA-8A6E-7D1F85173858},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,2/11/2010 12:00 AM,7/8/2025 12:00 AM,Wagner Correa,1/5/2026 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+180783,{692999D7-E98A-4C5D-9DF1-1A513DD87BA5},Jennifer,Elster,10013,PAT,Patient,,,New York,8/17/2018 10:49 AM,10/30/2025 12:00 AM,Shafer Helfer,12/16/2025 12:00 AM,Yes,D,Dismissed,Jennifer Elster
+210260,{636BF997-8D0E-463D-9C86-DFF3A0A835B5},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,4/13/2021 11:50 AM,7/31/2025 12:00 AM,Simcha Grieve,1/19/2026 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+210422,{DDE17658-6356-4C10-BCAB-49A9043CD0F2},James,Eisdorfer,10022,DOC,Doctor,,James,New York,5/21/2021 11:35 AM,12/12/2025 12:00 AM,Freddie Cohen,1/2/2026 12:00 AM,Yes,D,Dismissed,James Eisdorfer
+210422,{DDE17658-6356-4C10-BCAB-49A9043CD0F2},Simon,Cohen,10013,PAT,Patient,,,New York,5/21/2021 11:35 AM,12/12/2025 12:00 AM,Freddie Cohen,1/2/2026 12:00 AM,Yes,D,Dismissed,Simon Cohen
+220094,{B3D078B9-8682-4874-80B9-3F2CE0532D5C},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,2/10/2022 3:49 PM,8/20/2025 12:00 AM,Rachel Strocko,1/6/2026 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+220361,{B4D62FE6-60DA-4C22-8670-37AA4AD72CD5},Jacqueline,Dikansky,10006,DOC,Doctor,,Jackie,New York,4/18/2022 10:07 AM,10/21/2025 9:55 AM,Olivia Avila,12/6/2025 12:00 AM,Yes,D,Dismissed,Jacqueline Dikansky
+220534,{A189BEC6-F2A1-45F6-AE52-14E723E554C0},Michael,King,10016,DOC,Doctor,,Michael,New York,6/2/2022 10:45 AM,11/10/2025 12:00 AM,Sofia Kenne,1/15/2026 12:00 AM,Yes,D,Dismissed,Michael King
+220795,{2CC75B8F-5AA7-4921-82C1-FD964181080E},Renee,Wild,10013,DOC,Doctor,,Renee,New York,8/12/2022 2:13 PM,7/14/2025 12:00 AM,Keira Vonwiller,1/19/2026 12:00 AM,Yes,D,Dismissed,Renee Wild
+230055,{4E9E8F83-EACE-4245-8905-72D24B2FE2F8},Roula,Tsolis,10013,DOC,Doctor,,Roula,New York,1/13/2023 3:36 PM,9/2/2025 12:00 AM,Juliet Wilder,12/8/2025 12:00 AM,Yes,D,Dismissed,Roula Tsolis
+230319,{A0C0F4EB-30A0-4C03-B92D-614FF620F682},,,,,,,,,3/20/2023 11:41 AM,4/29/2025 10:54 AM,Grusha Zack,1/2/2026 12:00 AM,Yes,D,Dismissed, 
+230423,{6D2E40BF-70A5-4892-9D24-3D47D4CC2BFA},Zaria,Noel,10005,PAT,Patient,,,NEW YORK,4/13/2023 12:37 PM,9/2/2025 12:00 AM,Lion Lourenco-noel,1/19/2026 12:00 AM,Yes,D,Dismissed,Zaria Noel
+231272,{6CBFFD0D-3665-4928-8F57-BC11B21BE6A7},Lois,Jackson,11238,DOC,Doctor,,,Brooklyn,11/16/2023 3:12 PM,6/12/2025 11:30 AM,Liliane Dycus,12/19/2025 12:00 AM,No,D,Dismissed,Lois Jackson
+240385,{7568040D-CB73-4A68-B0FF-D1AC0038F613},Gopi,Surti,7302,DOC,Doctor,,,Jersey City,3/25/2024 5:08 PM,3/20/2025 12:00 AM,Callum Song,12/8/2025 12:00 AM,Yes,C,Cancelled,Gopi Surti
+240391,{0A71FBFC-41B2-4DD0-A7D4-250786AB671F},Gopi,Surti,7302,DOC,Doctor,,,Jersey City,3/27/2024 3:05 PM,3/20/2025 12:00 AM,Addison Song,1/19/2026 12:00 AM,Yes,D,Dismissed,Gopi Surti
+240544,{24A64A29-49B0-4D74-A9A4-037737D4AE7E},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,5/2/2024 4:00 PM,8/21/2025 12:00 AM,Chase Nelson,11/14/2025 12:00 AM,Yes,C,Cancelled,Jeffrey and Jake Shapiro
+240710,{E659CDB0-0824-4BBB-AD7B-711487833143},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,5/21/2024 4:54 PM,6/19/2025 12:00 AM,Danielle Duhl,11/3/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+240710,{E659CDB0-0824-4BBB-AD7B-711487833143},Michael ,Friedberg,10022,PAT,Patient,,,New York,5/21/2024 4:54 PM,6/19/2025 12:00 AM,Danielle Duhl,11/3/2025 12:00 AM,Yes,D,Dismissed,Michael  Friedberg
+241974,{879FE0A4-D53E-4639-A177-191AF5F0A5DE},Lewis,Elson,11021,DOC,Doctor,,,Great Neck,8/2/2024 10:03 AM,9/25/2025 12:00 AM,Adam Spector,12/19/2025 12:00 AM,Yes,D,Dismissed,Lewis Elson
+242042,{B7842381-003C-4D23-AFB9-F1EBFF4268E8},Google,,,OTHER,Other,,,,8/21/2024 9:35 AM,6/18/2025 12:00 AM,Denise Zurilgen,12/4/2025 12:00 AM,Yes,D,Dismissed,Google 
+242220,{A3FDBEFE-95D6-4DFA-8760-0573AF37BFFE},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,9/23/2024 4:58 PM,2/18/2025 12:00 AM,Carlos Singer,1/19/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+242337,{0D094F01-BE6F-4236-AB04-AEE4F786E309},Sophia,Shapiro,10004,PAT,Patient,,,New York,10/21/2024 2:10 PM,6/9/2025 1:11 PM,Georgi Penukov,10/20/2025 12:00 AM,No,D,Dismissed,Sophia Shapiro
+242346,{BA8F06CE-4F0A-46A6-9F8C-9B1FFD6F9F95},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,10/22/2024 5:01 PM,2/11/2025 12:00 AM,Amy Hong,1/22/2026 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+242398,{12B19F42-B401-4087-AD91-6BEE4B73D599},Google,,,OTHER,Other,,,,11/4/2024 12:30 PM,6/2/2025 5:00 PM,Angello Hernandez De La Pena,12/1/2025 12:00 AM,Yes,D,Dismissed,Google 
+242478,{B33529F8-3EB3-47E2-8BCB-94B09225BC37},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,11/21/2024 11:28 AM,2/24/2025 11:31 AM,Wendy Fullenweider,11/14/2025 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+242488,{F3CA38C3-D73A-41F1-885A-DFCA54055F23},Lena,Varone,10021,DOC,Doctor,https://www.nyccd.com/,,New York,11/25/2024 11:48 AM,3/25/2025 10:13 AM,Analis Cruz,12/11/2025 12:00 AM,Yes,D,Dismissed,Lena Varone
+242542,{C08CA4C2-F4C3-4039-B32A-2B15FFD35A4E},Lois,Jackson,10012,DOC,Doctor,,,New York,12/6/2024 11:19 AM,5/23/2025 12:00 AM,Aia Moallemi-Skaf,12/29/2025 12:00 AM,Yes,D,Dismissed,Lois Jackson
+250022,{7D1AE53A-D2C0-4D69-800A-EE1C01D11315},Igor,Lantsberg,29650,DOC,Doctor,,,Greer,1/8/2025 11:03 AM,2/18/2025 12:00 AM,Denis Boyko,1/2/2026 12:00 AM,Yes,D,Dismissed,Igor Lantsberg
+250049,{F5B11B85-FC0F-4B0D-A212-6B2A930122FB},Jacqueline,Dikansky,10006,DOC,Doctor,,Jackie,New York,1/14/2025 1:23 PM,4/28/2025 10:54 AM,Alexei Stynes,11/11/2025 12:00 AM,No,C,Cancelled,Jacqueline Dikansky
+250065,{A0C789AA-8ECE-402F-A5DE-6179F0BE5DC5},Google,,,OTHER,Other,,,,1/16/2025 3:38 PM,2/6/2025 12:00 AM,Natalia Blewonska,10/28/2025 12:00 AM,No,X,No-Show,Google 
+250071,{534213ED-2343-4443-876B-7F89BA883E86},Google,,,OTHER,Other,,,,1/17/2025 1:34 PM,2/11/2025 12:00 AM,Courtney Monaghar,10/28/2025 12:00 AM,Yes,D,Dismissed,Google 
+250081,{A63D2FB6-1A8A-4B5D-A802-1023022A1EF6},Tiktok,,,OTHER,Other,,,,1/21/2025 10:33 AM,3/3/2025 10:50 AM,Ann Marie Gorczyca,12/15/2025 12:00 AM,No,X,No-Show,Tiktok 
+250085,{7FB465C1-8529-42AE-922F-A01D0B83092B},Michael,Sonick,6824,DOC,Doctor,,,Fairfield,1/21/2025 3:53 PM,3/6/2025 12:00 AM,Orrea Light,12/16/2025 12:00 AM,Yes,C,Cancelled,Michael Sonick
+250088,{D0709E2A-7CF2-4DE7-985B-73B28DBB7247},Adriana,Leone,10005,DOC,Doctor,,,New York,1/21/2025 5:49 PM,2/18/2025 12:00 AM,Michael Barbieri,1/12/2026 12:00 AM,Yes,D,Dismissed,Adriana Leone
+250099,{C03FB628-2D24-4DA5-8E85-C5304ACB5D43},Tiktok,,,OTHER,Other,,,,1/23/2025 9:06 AM,2/6/2025 12:00 AM,Nikki Shownkeen,9/29/2025 12:00 AM,Yes,D,Dismissed,Tiktok 
+250110,{C5FA1324-AD39-4B79-A90E-D08BD1A4C282},Wonnie,Rhieu,10006,DOC,Doctor,skydentalnyc.com,,New York,1/23/2025 5:07 PM,3/12/2025 4:06 PM,Nicole Press,9/20/2025 12:00 AM,Yes,D,Dismissed,Wonnie Rhieu
+250111,{82697362-B2D1-45A8-82D2-A00FCF78CDF9},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,1/24/2025 10:40 AM,2/13/2025 12:00 AM,Yidel Schwartz,12/12/2025 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+250114,{892B3393-106E-45A0-B7BF-40FDF523A85C},,,,PAT,Patient,,,,1/24/2025 2:20 PM,2/25/2025 12:00 AM,Evamichele St Hill-Brown,1/19/2026 12:00 AM,Yes,D,Dismissed, 
+250115,{394DF84F-5E40-4A42-BC45-08B929CC0AED},LS Ortho Pt,,,OTHER,Other,,,,1/24/2025 2:25 PM,2/25/2025 12:00 AM,Ethienne St Hill-Brown,1/19/2026 12:00 AM,Yes,D,Dismissed,LS Ortho Pt 
+250120,{C57EDC8F-27AF-43DE-8AB2-7444A3C2CBC4},Tiktok,,,OTHER,Other,,,,1/27/2025 9:55 AM,2/17/2025 12:00 AM,Morgan Norwood,12/18/2025 12:00 AM,Yes,C,Cancelled,Tiktok 
+250127,{42F99E13-9031-433B-9B2F-65D400DDBB13},Nicholas,Mack,10013,PAT,Patient,,Nick ,New York ,1/27/2025 3:19 PM,2/18/2025 12:00 AM,Audrey Madoff-Mack,1/2/2026 12:00 AM,Yes,D,Dismissed,Nicholas Mack
+250132,{7841F336-25C9-4EAA-9C97-BA40D706B2F5},Cynthia,Harder,11211,PAT,Patient,,Cyndi,Brooklyn,1/27/2025 3:55 PM,2/24/2025 12:00 AM,Julianna Harder,1/12/2026 12:00 AM,No,D,Dismissed,Cynthia Harder
+250141,{CB13520C-C17E-412C-8962-D2A07E1FF45B},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,1/28/2025 12:49 PM,4/16/2025 12:00 AM,Moritz Hilf,12/4/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250142,{550D9380-2DC5-41D4-BC59-15A2BE7A5B2F},Sara,Mercier,,DOC,Doctor,,,,1/28/2025 1:11 PM,2/26/2025 3:49 PM,Lainey McCabe-Plenge,9/4/2025 12:00 AM,No,D,Dismissed,Sara Mercier
+250148,{A5C33CCC-A079-4D79-8A2F-27B6BFE88886},Ann Marie,Gorczyca,11222,PAT,Patient,,,"Brooklyn
+",1/29/2025 10:48 AM,2/24/2025 12:00 AM,Teresa Kitfield,11/17/2025 12:00 AM,No,D,Dismissed,Ann Marie Gorczyca
+250153,{87B00300-C5AE-4836-84FD-B50F64E0F87C},Tiktok,,,OTHER,Other,,,,1/30/2025 11:11 AM,2/11/2025 12:00 AM,Evelyn Mandelli,10/21/2025 12:00 AM,No,X,No-Show,Tiktok 
+250173,{0923E75A-2020-4181-9031-AB236BD3BC5E},Google,,,OTHER,Other,,,,2/3/2025 3:19 PM,2/4/2025 10:57 AM,Roy Delgado,9/16/2025 12:00 AM,No,D,Dismissed,Google 
+250180,{10522D45-EECF-4434-93F1-0B63A8D14A7A},Veronica,Puzio,10006,DOC,Doctor,,,New York,2/4/2025 3:46 PM,3/4/2025 12:00 AM,Laura Coletti,12/12/2025 12:00 AM,No,D,Dismissed,Veronica Puzio
+250186,{561B20A4-A9C8-4DD8-A48F-422D3A50E234},Alla,Dorfman,10013,DOC,Doctor,,,New York,2/5/2025 11:25 AM,3/3/2025 11:55 AM,Freya Sanko,1/13/2026 12:00 AM,Yes,D,Dismissed,Alla Dorfman
+250194,{6087F45E-2FC0-44EB-A424-EBA7DB3A74A8},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,2/6/2025 9:10 AM,2/18/2025 12:34 PM,John Bachman,1/20/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250203,{EA57B72C-61BB-4E94-86E1-1E1B9FBD9CED},Jay,Neugarten,10022,DOC,Doctor,,Jay,New York,2/6/2025 5:39 PM,6/13/2025 12:00 AM,Michael Sanchez,10/21/2025 12:00 AM,No,D,Dismissed,Jay Neugarten
+250205,{0D388EA5-6E15-48F6-82BC-871ACF3C5285},Tiktok,,,OTHER,Other,,,,2/10/2025 11:04 AM,4/8/2025 12:18 PM,Zulay Roman,10/4/2025 12:00 AM,Yes,D,Dismissed,Tiktok 
+250212,{DB744325-1EB7-45F5-8620-3878AE0BEBC5},Instagram,,,OTHER,Other,,,,2/11/2025 10:21 AM,2/13/2025 12:00 AM,Madison Campbell,12/11/2025 12:00 AM,No,C,Cancelled,Instagram 
+250213,{51479238-D7FF-457B-ABB6-6BEDE0007833},Adam,Silevitch,11201,DOC,Doctor,,,Brooklyn,2/11/2025 11:05 AM,3/19/2025 12:00 AM,Ward Parke,1/22/2026 12:00 AM,Yes,D,Dismissed,Adam Silevitch
+250224,{A4BEAF3E-C2A3-44DC-9BA8-3EC362A0ED3D},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,2/12/2025 11:59 AM,2/13/2025 12:00 AM,Giulia Lipton,12/4/2025 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+250229,{DDD35D5B-34F5-4115-8892-EF8F28225DAB},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,2/13/2025 10:03 AM,9/16/2025 12:00 AM,Ryan Smith,1/13/2026 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+250234,{87316FCE-033F-4E05-AE74-0253AB4B3C3D},Google,,,OTHER,Other,,,,2/13/2025 4:37 PM,3/4/2025 9:15 AM,Lindsay Rosenbaum,12/15/2025 12:00 AM,Yes,D,Dismissed,Google 
+250242,{3609F516-17F9-499C-84F4-21DA8E8493A0},Lori,Shapiro,10004,PAT,Patient,,,New York,2/14/2025 3:11 PM,3/6/2025 12:39 PM,Kathy Urbina,1/22/2026 12:00 AM,Yes,D,Dismissed,Lori Shapiro
+250270,{2F9F5B96-E1AC-4E7E-9790-4440E62600FE},,,,PAT,Patient,,,,2/21/2025 11:51 AM,3/13/2025 12:00 AM,Alex Barkley,1/19/2026 12:00 AM,No,D,Dismissed, 
+250270,{2F9F5B96-E1AC-4E7E-9790-4440E62600FE},LS Ortho Pt,,,OTHER,Other,,,,2/21/2025 11:51 AM,3/13/2025 12:00 AM,Alex Barkley,1/19/2026 12:00 AM,No,D,Dismissed,LS Ortho Pt 
+250271,{4C12DF71-FC27-48C6-A56B-20159E8B7957},Lois,Jackson,11238,DOC,Doctor,,,Brooklyn,2/21/2025 12:13 PM,4/9/2025 4:11 PM,Wilson Smith,1/16/2026 12:00 AM,Yes,D,Dismissed,Lois Jackson
+250275,{DA41EF95-28C2-4DC4-AA6B-6F9212B32E42},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,2/24/2025 12:17 PM,3/27/2025 12:00 AM,Carol Terilli,4/21/2025 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+250277,{A694E9A8-FF8C-4FF2-BEF0-3F9AC7753046},Emanual,Layliev,10021,DOC,Doctor,,Manny,New York,2/24/2025 1:23 PM,4/14/2025 12:00 AM,Emily Disman,12/1/2025 12:00 AM,No,Y,Ready for Checkout,Emanual Layliev
+250281,{312B7FC2-C402-4BB0-BF6A-B95FA1E3E3DB},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,2/24/2025 5:14 PM,3/4/2025 12:00 AM,Kirsten Turnbull,10/20/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250284,{54CC2D93-9DAC-4AA1-827C-982CDBACC650},JB,Peterman,7928,DOC,Doctor,jbpetermanortho.com,,Chatham,2/25/2025 12:27 PM,12/12/2025 3:05 PM,Eva Lambrianakos,1/19/2026 12:00 AM,Yes,C,Cancelled,JB Peterman
+250318,{E8EC166B-19EA-4A50-98AB-54CE7B338EE4},Google,,,OTHER,Other,,,,3/5/2025 2:50 PM,12/4/2025 12:00 AM,Hugo Dinis,1/16/2026 12:00 AM,Yes,D,Dismissed,Google 
+250345,{C060A23A-06FF-486E-BBF6-D92309E4A249},Internet Research,,,OTHER,Other,,,,3/12/2025 1:08 PM,5/1/2025 12:00 AM,Madeline Keiger,11/20/2025 12:00 AM,No,C,Cancelled,Internet Research 
+250379,{0835D9B0-812C-4418-A265-D9F61E09413F},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,3/19/2025 12:17 PM,4/28/2025 12:18 PM,Sarah Fried,12/4/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250396,{6F92EA3D-B869-4B4A-8F09-F5407191AD75},Jennifer,Salzer,11577,DOC,Doctor,,,Roslyn Heights,3/24/2025 11:46 AM,4/8/2025 12:00 AM,Skylar Stanfield,12/19/2025 12:00 AM,Yes,D,Dismissed,Jennifer Salzer
+250397,{4A40457D-0A9F-40E3-9754-7EA36567C5E5},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,3/25/2025 9:50 AM,4/3/2025 9:25 AM,Paxton Dunn,12/19/2025 12:00 AM,No,X,No-Show,Jeffrey and Jake Shapiro
+250398,{03C10B2F-E1FD-4536-8F59-C0ADAF101F83},Tiktok,,,OTHER,Other,,,,3/25/2025 10:04 AM,4/3/2025 12:00 AM,Mahogany Wade,10/28/2025 12:00 AM,Yes,D,Dismissed,Tiktok 
+250400,{921FB0FE-9887-4352-B826-2A46AAE33FD1},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,3/25/2025 4:42 PM,7/29/2025 12:00 AM,Toni-Ann Turco,1/15/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250402,{3FE62F58-6631-4F50-821F-D8FF41FB9D27},Tiktok,,,OTHER,Other,,,,3/27/2025 2:38 PM,4/29/2025 12:00 AM,Mackenzie Archer,10/28/2025 12:00 AM,Yes,D,Dismissed,Tiktok 
+250405,{1CA9E171-A318-479D-A2E5-686E825204B8},Tiktok,,,OTHER,Other,,,,3/31/2025 9:51 AM,7/16/2025 11:19 AM,Alissa Kamhi,1/12/2026 12:00 AM,No,D,Dismissed,Tiktok 
+250406,{E86A17DB-079C-4E07-9E02-27A432F0D5A8},Lori,Shapiro,10004,PAT,Patient,,,New York,3/31/2025 11:40 AM,4/24/2025 12:00 AM,Christine Cotney Benson,1/2/2026 12:00 AM,Yes,D,Dismissed,Lori Shapiro
+250408,{F544E2F3-8F12-4568-B6BA-C691D5773AC4},Tiktok,,,OTHER,Other,,,,4/1/2025 12:44 PM,4/18/2025 2:44 PM,Brianne Thompson-martin,6/17/2025 12:00 AM,No,X,No-Show,Tiktok 
+250410,{0B23E494-6BB6-4202-9EF1-18DD6E69EFA5},Jacqueline,Dikansky,10006,DOC,Doctor,,Jackie,New York,4/1/2025 3:26 PM,7/3/2025 12:00 AM,Piper Chyra,1/20/2026 12:00 AM,Yes,D,Dismissed,Jacqueline Dikansky
+250412,{A2996EA4-59D4-441D-AA92-F9796A23F648},Rebecca,O'Neill,7086,PAT,Patient,,,Weehawken,4/3/2025 12:38 PM,9/15/2025 9:56 AM,Tushain Newman,1/22/2026 12:00 AM,Yes,D,Dismissed,Rebecca O'Neill
+250413,{CCFFE3B2-15D2-493A-A77C-54015A013154},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,4/3/2025 3:04 PM,4/15/2025 12:00 AM,Magda Gagliano,10/23/2025 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+250416,{8DBC20F2-A104-4A63-8DA6-1341D63B1209},Renee,Wild,10013,DOC,Doctor,,Renee,New York,4/4/2025 3:41 PM,1/20/2026 12:00 AM,Luciano Filippa,10/14/2025 12:00 AM,Yes,D,Dismissed,Renee Wild
+250420,{9B292D17-BA04-4626-B16D-B074358F2726},Tiktok,,,OTHER,Other,,,,4/7/2025 12:08 PM,5/19/2025 12:00 AM,Shania Payano,1/12/2026 12:00 AM,Yes,D,Dismissed,Tiktok 
+250424,{AF8A96AE-9B78-4EC5-8971-648B7FD243C4},Neysha,Patel,10006,DOC,Doctor,,,New York,4/8/2025 11:52 AM,7/10/2025 12:00 AM,Taylor Roberts,12/18/2025 12:00 AM,Yes,D,Dismissed,Neysha Patel
+250426,{F8AB6EB6-434F-436D-911A-B36C096FEC5D},Google Search,,,OTHER,Other,,,,4/9/2025 3:34 PM,5/5/2025 12:00 AM,Olivia Depagter,12/2/2025 12:00 AM,Yes,C,Cancelled,Google Search 
+250429,{752FEBBA-DEBF-4829-A17C-FA8D93729943},Veronica,Puzio,10006,DOC,Doctor,,,New York,4/10/2025 9:36 AM,9/15/2025 12:00 AM,Krista McMurry,1/5/2026 12:00 AM,Yes,D,Dismissed,Veronica Puzio
+250433,{2C2D2085-8EA6-4455-86D5-492B747FE014},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,4/14/2025 10:08 AM,5/6/2025 12:00 AM,David Vogt,12/4/2025 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+250437,{EC02F517-5E87-466E-85A8-8FD7A7935987},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,4/18/2025 12:00 PM,5/16/2025 12:18 PM,Michael Lipton,1/5/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250439,{5F43FBBB-E4B5-4D57-AD5C-3392A6638E30},Adam,Silevitch,11201,DOC,Doctor,,,Brooklyn,4/21/2025 3:00 PM,5/29/2025 12:00 AM,Vera Hartman-Vickers,12/18/2025 12:00 AM,Yes,D,Dismissed,Adam Silevitch
+250440,{BC367F8B-D8DB-47CB-93B8-01878B3DC31B},Lois,Jackson,11238,DOC,Doctor,,,Brooklyn,4/22/2025 10:19 AM,9/2/2025 10:58 AM,Oliver Benjamin,1/20/2026 12:00 AM,Yes,D,Dismissed,Lois Jackson
+250441,{4831F3BB-F1A6-49AF-A36D-CE95235ACB3D},Leilani,Myers,,DOC,Doctor,,,New York,4/22/2025 2:40 PM,7/16/2025 12:00 AM,Reginald Dorsey,12/8/2025 12:00 AM,Yes,D,Dismissed,Leilani Myers
+250443,{9449E825-7141-4118-BB61-B21D0797C568},Artem,Krutyansky,10032,DOC,Doctor,,,New York,4/23/2025 10:09 AM,6/5/2025 4:14 PM,Joshua Hanau,12/11/2025 12:00 AM,Yes,D,Dismissed,Artem Krutyansky
+250444,{AB568AF4-3B0F-45FD-9989-560EF7D9764E},Google,,,OTHER,Other,,,,4/24/2025 2:26 PM,5/1/2025 12:00 AM,Rose Lauricella,1/13/2026 12:00 AM,Yes,D,Dismissed,Google 
+250445,{C98EAF2D-8138-4DF6-92B5-307468E4773F},Veronica,Puzio,10006,DOC,Doctor,,,New York,4/28/2025 9:52 AM,5/20/2025 12:00 AM,Sarah Bouzine,1/12/2026 12:00 AM,Yes,D,Dismissed,Veronica Puzio
+250448,{A5E11728-6FDF-46FB-B19B-9BAB5BFBA736},Stacy,Zarakiotis,6831,DOC,Doctor,,Stacy,Greenwich,4/29/2025 4:19 PM,5/22/2025 12:00 AM,Ella Meyer,1/20/2026 12:00 AM,Yes,D,Dismissed,Stacy Zarakiotis
+250450,{E06FBF91-C9A9-4034-A14D-9EE5A8203691},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,5/1/2025 10:31 AM,5/15/2025 12:00 AM,Ava Noble,8/5/2025 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+250454,{051DEF3A-D235-4364-9702-0420F8621894},Google,,,OTHER,Other,,,,5/5/2025 2:02 PM,7/3/2025 12:00 AM,Nour Marzouk,1/5/2026 12:00 AM,Yes,X,No-Show,Google 
+250460,{6F7F2C98-3091-437B-BC2B-2B2E7304BEFB},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,5/9/2025 2:30 PM,11/5/2025 12:00 AM,Katie Holden,12/9/2025 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+250468,{15615386-E1DB-44E1-878E-F36DD97704C4},Wonnie,Rhieu,10006,DOC,Doctor,skydentalnyc.com,,New York,5/14/2025 1:09 PM,10/30/2025 12:44 PM,Sohum Doshi,12/9/2025 12:00 AM,Yes,D,Dismissed,Wonnie Rhieu
+250479,{EB725F9D-E3F6-4F00-B899-525963BCCC7F},Google,,,OTHER,Other,,,,5/20/2025 2:50 PM,6/25/2025 12:00 AM,Kevin Kuang,1/13/2026 12:00 AM,Yes,D,Dismissed,Google 
+250481,{CFF833EC-BF6F-4B76-8D20-9C5CEA75FBA4},Veronica,Puzio,10006,DOC,Doctor,,,New York,5/20/2025 5:15 PM,6/23/2025 12:00 AM,Yutian Lin,12/19/2025 12:00 AM,Yes,D,Dismissed,Veronica Puzio
+250483,{AA04D71B-38DA-4B8F-B3E9-F3CE2BB82573},Marjorie,Goldner,10013,PAT,Patient,,,New York,5/22/2025 4:46 PM,6/3/2025 10:02 AM,Jessica Saslow,1/13/2026 12:00 AM,Yes,D,Dismissed,Marjorie Goldner
+250484,{1E419637-2AAB-43DB-B76F-59DAE872A048},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,5/22/2025 5:34 PM,6/5/2025 12:00 AM,Marjorie Goldner,12/11/2025 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+250490,{9F7A28D3-E4C8-4ED4-9F01-D5576356CBCF},Google,,,OTHER,Other,,,,,9/25/2025 12:00 AM,Ryan Lonergan,1/16/2026 12:00 AM,Yes,D,Dismissed,Google 
+250493,{D83E9780-B81A-4B96-9E03-7E040390FEF5},Google,,,OTHER,Other,,,,5/28/2025 4:57 PM,6/23/2025 12:00 AM,Melissa Miller,11/11/2025 12:00 AM,Yes,C,Cancelled,Google 
+250496,{37699A5A-F999-4767-BD4D-C575907180AB},Jacqueline,Dikansky,10006,DOC,Doctor,,Jackie,New York,5/29/2025 4:54 PM,9/16/2025 12:00 AM,Hannah Tangri-Luna,1/16/2026 12:00 AM,Yes,C,Cancelled,Jacqueline Dikansky
+250502,{5036FE27-2AF7-409D-88AA-4076C5C42CD1},Veronica,Puzio,10006,DOC,Doctor,,,New York,6/2/2025 11:53 AM,6/11/2025 3:01 PM,Jasminara Uddin,1/13/2026 12:00 AM,Yes,D,Dismissed,Veronica Puzio
+250507,{0E6314A9-99A3-4084-BC3B-16E4E0580018},Nojan,Bakhtiari,10016,DOC,Doctor,,Nojan,"New York,",6/5/2025 4:49 PM,9/4/2025 12:00 AM,Meghan Vinnicombe,1/12/2026 12:00 AM,Yes,D,Dismissed,Nojan Bakhtiari
+250510,{7FD34682-815E-4FF8-9049-2F9C6334F39D},Muna,Sigdel,10038,DOC,Doctor,pdadental.com,,New York,,6/24/2025 12:00 AM,Kenzo Yoshida,1/19/2026 12:00 AM,Yes,D,Dismissed,Muna Sigdel
+250513,{C3FD0FAE-A1CC-4D88-901A-828A5B93A68A},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,6/9/2025 2:55 PM,6/18/2025 2:54 PM,Joseph Becwar,11/20/2025 12:00 AM,No,X,No-Show,Jeffrey and Jake Shapiro
+250514,{72FC543D-1DF4-4B4B-BE33-56C7C2C6BD97},Tiktok,,,OTHER,Other,,,,,6/19/2025 12:00 AM,Saimum Ahmed,1/20/2026 12:00 AM,Yes,D,Dismissed,Tiktok 
+250516,{7D6B9382-0FEC-4593-9252-E941EAA7497F},Google,,,OTHER,Other,,,,,8/28/2025 10:58 AM,Sam Molitoriss,1/20/2026 12:00 AM,Yes,D,Dismissed,Google 
+250518,{899F238E-B15F-485D-ACB3-D5432B89733E},Sharon,Huang,10022,DOC,Doctor,,,New York,6/11/2025 11:54 AM,7/3/2025 9:37 AM,Jennifer Fitzgerald,1/19/2026 12:00 AM,Yes,D,Dismissed,Sharon Huang
+250520,{C49A100C-6821-4E2D-BE16-D520498D5D40},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,6/12/2025 3:17 PM,7/30/2025 12:00 AM,Dennis Cusack,1/20/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250522,{FE8D528E-F0D2-4C93-93E0-A1FDAA8BEC02},Google,,,OTHER,Other,,,,,7/15/2025 12:00 AM,Arianna Herrera,1/22/2026 12:00 AM,Yes,C,Cancelled,Google 
+250524,{3DB802ED-9E66-478F-91C5-9A9A6B4C6307},Adam,Silevitch,11201,DOC,Doctor,,,Brooklyn,6/16/2025 2:16 PM,7/9/2025 9:42 AM,Malcom Rawlins,12/12/2025 12:00 AM,Yes,D,Dismissed,Adam Silevitch
+250527,{C8061EFF-EB29-4C2C-A474-F4312426B92B},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,6/18/2025 10:21 AM,8/14/2025 12:00 AM,Colby Hanley,11/11/2025 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+250528,{4A57938E-7F68-4DC1-B46B-8979257E1FB1},Stefanie,Rodriguez,10468,PAT,Patient,,,Bronx,6/18/2025 11:17 AM,8/21/2025 12:00 AM,Christopher Juarez,1/13/2026 12:00 AM,Yes,C,Cancelled,Stefanie Rodriguez
+250531,{FBCF244D-36C7-45F1-9D97-4CE07297C939},LS Ortho Pt,,,OTHER,Other,,,,6/19/2025 11:02 AM,10/21/2025 12:00 AM,Allison Hothersall,1/6/2026 12:00 AM,Yes,D,Dismissed,LS Ortho Pt 
+250540,{C1C8B4AF-E006-4DE0-BF48-342A35058CA9},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,6/24/2025 3:55 PM,7/22/2025 12:00 AM,Paul Spector,11/14/2025 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+250546,{A6A5EEBB-F376-4920-9AD6-51C2969472C4},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,6/27/2025 1:52 PM,7/16/2025 12:00 AM,Tess Goldberg,1/6/2026 12:00 AM,No,D,Dismissed,Jeffrey and Jake Shapiro
+250549,{20955A19-DF8B-4E99-A569-971E5C764CC6},LS Ortho Pt,,,OTHER,Other,,,,6/30/2025 11:22 AM,1/20/2026 12:00 AM,Sandra Robinson,1/16/2026 12:00 AM,Yes,D,Dismissed,LS Ortho Pt 
+250558,{8A513382-887A-4788-80D5-61C3215546B7},Tiktok,,,OTHER,Other,,,,7/2/2025 2:39 PM,8/7/2025 1:34 PM,Alessia Cuomo,1/16/2026 12:00 AM,Yes,D,Dismissed,Tiktok 
+250562,{B5E07C5F-AB48-4E0C-B665-B0FD189BD267},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,7/3/2025 12:59 PM,11/6/2025 12:00 AM,Jade Stuart,1/22/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250576,{B69C8679-2672-4BC2-ABEC-2F488A2F194B},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,7/9/2025 11:51 AM,7/9/2025 12:00 AM,Natalia Angel,1/19/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250581,{52F3BE66-1929-47B6-BF55-717513CA7ABC},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,7/14/2025 1:21 PM,8/5/2025 12:00 AM,Carole Sebbane,1/5/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250583,{4F7CA429-0BC2-49F1-8F30-8C34BE93BAE1},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,7/14/2025 3:07 PM,9/23/2025 12:00 AM,Alexandra Witter,12/12/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250587,{94086E81-5D38-4A3E-936F-CA356D3073A0},David,Alfi,77030,DOC,Doctor,,,Houston,7/17/2025 9:17 AM,8/11/2025 12:00 AM,Ana Vitoria Rodrigues Lima,12/18/2025 12:00 AM,Yes,D,Dismissed,David Alfi
+250590,{2C280D19-BE3C-4F11-9A63-4B6B11680D0C},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,7/17/2025 2:19 PM,8/6/2025 3:08 PM,Andrew Strocko,1/22/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250599,{59F99509-C235-4473-ABF9-CD5BB4A95673},Chris,Classi,10065,DOC,Doctor,classismilesnyc.com,,New York,7/21/2025 11:38 AM,7/24/2025 12:00 AM,Hana Ajjuri,12/9/2025 12:00 AM,No,C,Cancelled,Chris Classi
+250612,{A81A7850-0378-42BA-90CF-2EDD03341528},Tiktok,,,OTHER,Other,,,,,11/24/2025 12:07 PM,Kayon Crawford,12/12/2025 12:00 AM,No,D,Dismissed,Tiktok 
+250619,{F2F84057-DC9C-4A91-9BAA-F08748C15F26},Lena,Varone,10021,DOC,Doctor,https://www.nyccd.com/,,New York,,8/19/2025 12:00 AM,Rose Larkin,1/22/2026 12:00 AM,Yes,D,Dismissed,Lena Varone
+250620,{035274BB-2DAD-4C63-AEBE-4E256742A9FE},Lucas,Shapiro,10280,PAT,Patient,,Luke,New York,8/5/2025 9:39 AM,8/20/2025 12:00 AM,Chloe Caine,12/2/2025 12:00 AM,No,C,Cancelled,Lucas Shapiro
+250623,{95982242-4D7B-4B4C-A8E5-83FD8974C0CF},Tiktok,,,OTHER,Other,,,,,9/25/2025 11:16 AM,Sharon Hsueh,12/9/2025 12:00 AM,No,C,Cancelled,Tiktok 
+250628,{A987EA5A-B65D-455D-A540-482FC4A5F36A},Bonsa,Namera,,DOC,Doctor,,,,8/8/2025 10:47 AM,8/19/2025 1:47 PM,Malik Stewart,1/13/2026 12:00 AM,No,Y,Ready for Checkout,Bonsa Namera
+250632,{47131CC5-FED8-48E4-A5E4-30C6C189B247},David,Alfi,77030,DOC,Doctor,,,Houston,8/12/2025 4:15 PM,11/18/2025 4:23 PM,Mariia Mikhailova,12/8/2025 12:00 AM,Yes,D,Dismissed,David Alfi
+250633,{3CA4FAD0-0615-4016-B7E1-7F15CE1E0A48},ChatGPT,,,OTHER,Other,,,,8/12/2025 4:51 PM,9/5/2025 12:00 AM,"Brendan Paez
+",12/12/2025 12:00 AM,No,D,Dismissed,ChatGPT 
+250634,{FB9ABC24-FAC1-4D46-81E2-0845213CAA73},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,8/13/2025 3:27 PM,8/21/2025 4:05 PM,Lauren Morrison,1/19/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250636,{2D0F136C-BD22-4F37-84AD-1B8CDE5A90B0},Sashekala,Bhagirath-Singh,,PAT,Patient,,,,8/14/2025 10:49 AM,10/30/2025 5:52 PM,Rovindra Singh,12/15/2025 12:00 AM,Yes,D,Dismissed,Sashekala Bhagirath-Singh
+250637,{B98BCAC3-E565-48F9-8713-42496BF64860},Tiktok,,,OTHER,Other,,,,,9/22/2025 12:24 PM,Lourdes Arellano,1/13/2026 12:00 AM,Yes,X,No-Show,Tiktok 
+250639,{5009E2C1-F8EA-4621-B88B-6F3E67B1B602},Muna,Sigdel,10038,DOC,Doctor,pdadental.com,,New York,8/15/2025 3:08 PM,9/2/2025 12:00 AM,Lula Yoshida,1/19/2026 12:00 AM,Yes,D,Dismissed,Muna Sigdel
+250647,{776162BA-7735-4619-8796-2EA4A0A10563},Alex,Mabie,,NPAT,Non-Patient,,,,8/21/2025 12:56 PM,9/16/2025 12:00 AM,Natalie Lech,1/16/2026 12:00 AM,Yes,D,Dismissed,Alex Mabie
+250648,{7A112B69-CB67-49B2-8906-A0FFCD52D927},Google Search,,,OTHER,Other,,,,8/21/2025 4:25 PM,9/8/2025 12:00 AM,Valentina Dokic,12/4/2025 12:00 AM,Yes,D,Dismissed,Google Search 
+250651,{52DBAB11-A597-4395-B1E7-D9170939F3F0},Google,,,OTHER,Other,,,,,9/19/2025 12:00 AM,Kayleigh Mcguigan,1/22/2026 12:00 AM,Yes,D,Dismissed,Google 
+250652,{A4358D2E-D5DD-4A32-BD9F-F91B1BF61CAE},Google,,,OTHER,Other,,,,8/25/2025 12:22 PM,9/18/2025 12:00 AM,Danielle Merinoff,1/15/2026 12:00 AM,Yes,D,Dismissed,Google 
+250653,{D22D8628-3550-4A8D-B26D-134A6F9A6924},Benjamin,Cassalia,18914,DOC,Doctor,,Ben,Chalfont,,11/20/2025 9:08 AM,Ava Rosati,1/12/2026 12:00 AM,Yes,D,Dismissed,Benjamin Cassalia
+250654,{04BEC8D4-79CA-4F01-A2D3-1332B81C8544},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,8/26/2025 10:58 AM,9/24/2025 12:00 AM,Charlotte Golden,1/20/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250658,{3372205D-EC79-4E39-99D3-E710C83F2E3B},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,8/27/2025 12:20 PM,9/3/2025 12:08 PM,Marian Morris,1/14/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250665,{4D38B8DB-255B-4662-BBEC-A7C58D1ACE1D},Jay,Neugarten,10022,DOC,Doctor,,Jay,New York,9/2/2025 5:01 PM,9/15/2025 12:00 AM,Jessica Jordan,1/12/2026 12:00 AM,Yes,D,Dismissed,Jay Neugarten
+250678,{A449949B-82B4-4A3A-912C-9A31550F078E},Charlotte,Warshaw,10013,BILL,Billing Party,,,New York,9/15/2025 10:26 AM,9/23/2025 12:00 AM,Jacob Warshaw,1/22/2026 12:00 AM,Yes,D,Dismissed,Charlotte Warshaw
+250681,{5F0DB32C-753C-4C7D-991A-97655AAB4167},Lori,Paires,10013,DOC,Doctor,,,New York,9/15/2025 3:35 PM,11/17/2025 12:37 PM,Angelika Kimball-Rakhova,1/16/2026 12:00 AM,No,D,Dismissed,Lori Paires
+250682,{75B44B90-A994-4474-9211-FE1B6BFB5DF8},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,9/16/2025 4:07 PM,9/22/2025 12:00 AM,Craig Wenzel,10/16/2025 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+250688,{8FA36382-BC46-4E74-88D7-BFE17C16BBC4},David,Alfi,77030,DOC,Doctor,,,Houston,9/18/2025 9:22 AM,10/8/2025 12:00 AM,Tate Simmons,12/1/2025 12:00 AM,Yes,Y,Ready for Checkout,David Alfi
+250692,{9FBDDBF5-6A3A-4E95-9039-AC937D9FF5DD},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,9/22/2025 9:19 AM,11/11/2025 10:39 AM,Samuel Schapira,12/15/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250693,{0D3F9463-D620-43A0-AA2D-EAE63A5C1DEC},Frank,Sharp,65804,DOC,Doctor,sharporthodontics.com,,Springfield,9/22/2025 2:56 PM,10/20/2025 12:00 AM,Anna Keese,11/14/2025 12:00 AM,No,D,Dismissed,Frank Sharp
+250695,{6B7D9F15-841D-4804-9A03-33C30B9F85D5},Roula,Tsolis,10013,DOC,Doctor,,Roula,New York,9/23/2025 11:56 AM,9/29/2025 12:00 AM,Vivian Wilder,1/6/2026 12:00 AM,Yes,D,Dismissed,Roula Tsolis
+250698,{62CC2AC7-57EB-4E9F-B364-C0F8590B5059},Maria,Ouranitsas,10004,PAT,Patient,,,New York,9/25/2025 11:13 AM,10/9/2025 12:00 AM,Marina Ouranitsas,1/20/2026 12:00 AM,Yes,D,Dismissed,Maria Ouranitsas
+250705,{56706A74-CF06-4B3E-93D1-ED93324C331F},Tiktok,,,OTHER,Other,,,,,1/13/2026 12:00 AM,Beriwan Salamat Ravandi,1/13/2026 12:00 AM,Yes,D,Dismissed,Tiktok 
+250706,{A9B64A5C-8BF1-4375-ADEA-493356DF733B},Callum,Song,7302,PAT,Patient,,,Jersey City,9/30/2025 9:14 AM,1/6/2026 4:30 PM,Chloe Carvalho,1/5/2026 12:00 AM,Yes,D,Dismissed,Callum Song
+250710,{B25E0555-07FB-4908-A4CF-643BEC5E5AE9},Caitlin,Berwick,10005,DOC,Doctor,wallstdentalspanyc.com,,New York,10/1/2025 9:23 AM,12/16/2025 12:00 AM,Georgina Mcleod,1/12/2026 12:00 AM,Yes,D,Dismissed,Caitlin Berwick
+250716,{02341A53-F0F1-4CBF-9E5C-27B58FD505E5},Lara,Arnold,10013,PAT,Patient,,,New York,10/6/2025 2:36 PM,12/8/2025 12:00 AM,Dianne Arnold,1/22/2026 12:00 AM,Yes,D,Dismissed,Lara Arnold
+250720,{86FC98C6-C4C0-433E-80D9-607D3465E9D2},Stephanie,Sager,11211,DOC,Doctor,,,New York,10/9/2025 4:37 PM,10/27/2025 12:00 AM,Margaret Navin,12/8/2025 12:00 AM,Yes,D,Dismissed,Stephanie Sager
+250722,{E9B680C6-6DB6-43DE-8BCB-78AD8638E206},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,10/10/2025 1:13 PM,11/13/2025 2:37 PM,Mahoko Seko-Long,12/16/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250723,{C3899409-7EB8-4897-B506-070897CA5672},LS Ortho Pt,,,OTHER,Other,,,,,10/21/2025 12:53 PM,Cassandra Najjar,12/19/2025 12:00 AM,Yes,D,Dismissed,LS Ortho Pt 
+250725,{C4F035B6-7180-4290-A9A9-0ACA2667925D},Behazin,Torkian,10003-9721,DOC,Doctor,,,Newyork,10/16/2025 11:59 AM,11/10/2025 12:00 AM,Sarah Clarkson,12/2/2025 12:00 AM,Yes,D,Dismissed,Behazin Torkian
+250729,{7F0255A8-64D6-43B1-A60C-3996519EA2BC},Instagram,,,OTHER,Other,,,,10/21/2025 4:05 PM,10/28/2025 3:58 PM,Melissa Lezano,1/5/2026 12:00 AM,Yes,D,Dismissed,Instagram 
+250733,{48ED8821-04F2-46F5-9D78-06D04CEF5CD3},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,10/27/2025 3:53 PM,10/30/2025 1:33 PM,Deborah Holland,11/18/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250733,{48ED8821-04F2-46F5-9D78-06D04CEF5CD3},Kirsten,Turnbull,10025,PAT,Patient,,,New York,10/27/2025 3:53 PM,10/30/2025 1:33 PM,Deborah Holland,11/18/2025 12:00 AM,Yes,D,Dismissed,Kirsten Turnbull
+250734,{DA5AC583-B334-4FF1-8112-C4D9C3D910A1},Cassius,Toussant,11201,PAT,Patient,,,New York,10/28/2025 9:31 AM,11/4/2025 12:00 AM,Otis Fitzpatrick,1/12/2026 12:00 AM,Yes,D,Dismissed,Cassius Toussant
+250736,{DFA787F2-97EB-4BCA-A2CB-99FC6E7FC83A},Google,,,OTHER,Other,,,,10/28/2025 3:05 PM,11/14/2025 10:55 AM,Alexander Levitte,1/16/2026 12:00 AM,Yes,C,Cancelled,Google 
+250737,{25CAA8F9-920B-477B-B46E-A53241029D2B},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,10/29/2025 8:59 AM,11/14/2025 12:00 AM,Graydon Santos,12/1/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250740,{CF5E5A8B-E54A-4FF1-B00D-640827092C40},Lori,Paires,10013,DOC,Doctor,,,New York,10/30/2025 2:27 PM,11/4/2025 12:00 AM,Bernard Chaus,1/15/2026 12:00 AM,Yes,D,Dismissed,Lori Paires
+250743,{45A1C243-7A39-45D6-8CD2-248BBE86BFDB},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,11/3/2025 10:33 AM,11/10/2025 12:00 AM,Lauren Lata,1/22/2026 12:00 AM,No,C,Cancelled,Jeffrey and Jake Shapiro
+250744,{C6BB6EAB-58A7-4E2F-BA4F-40875C6490A2},Google Search,,,OTHER,Other,,,,11/3/2025 11:52 AM,11/6/2025 12:00 AM,Subaru Honge,1/12/2026 12:00 AM,Yes,D,Dismissed,Google Search 
+250750,{9C8C3084-624E-4CE0-A66B-7206746CFB5E},Charlotte,Golden,10013,PAT,Patient,,,New York,,11/19/2025 1:23 PM,Kelly Peck,12/16/2025 12:00 AM,Yes,D,Dismissed,Charlotte Golden
+250751,{E1208064-B90A-44F7-BE6A-0B6DE5942B6E},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,11/10/2025 3:30 PM,11/19/2025 12:00 AM,Samuel Funk,12/9/2025 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250761,{8E3497AC-D7BE-4963-8AC7-0E1246A23BCC},Google,,,OTHER,Other,,,,11/12/2025 1:33 PM,11/18/2025 10:57 AM,Regan Dally,1/5/2026 12:00 AM,Yes,D,Dismissed,Google 
+250766,{648E0489-D89C-436B-92CD-A1EF158FBD6A},Tiktok,,,OTHER,Other,,,,11/26/2025 1:38 PM,12/18/2025 12:00 AM,Erin Coffey,1/12/2026 12:00 AM,No,D,Dismissed,Tiktok 
+250768,{E2BD9A0E-D947-4241-82BE-942A0CE7B2DC},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,12/1/2025 3:06 PM,12/9/2025 12:00 AM,Lesley Snyder,1/13/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+250770,{FC51F241-35A9-478F-B577-F45054D74A87},Tiktok,,,OTHER,Other,,,,,12/19/2025 3:31 PM,Lameka Fox,1/12/2026 12:00 AM,No,X,No-Show,Tiktok 
+250771,{571874C2-10A0-4328-A4C4-7514D720D93D},Behazin,Torkian,10003-9721,DOC,Doctor,,,Newyork,12/2/2025 3:58 PM,12/12/2025 2:47 PM,Cristina Aculova,1/6/2026 12:00 AM,Yes,D,Dismissed,Behazin Torkian
+250779,{CAC4CDC2-F5F9-4BB6-8A2A-54DC1BB29E23},Nour,Marzouk,7934,PAT,Patient,,,Gladstone ,12/8/2025 10:59 AM,1/5/2026 12:00 AM,Hanan Anwar,1/5/2026 12:00 AM,Yes,D,Dismissed,Nour Marzouk
+250784,{A28F5051-F011-4F40-8928-BE07DE19F6C2},Tiktok,,,OTHER,Other,,,,12/11/2025 11:16 AM,1/6/2026 12:00 AM,Karina Lopez,1/20/2026 12:00 AM,Yes,C,Cancelled,Tiktok 
+250796,{BE9EB3BB-A071-44FA-89A6-9A5073CDA92A},Lena,Varone,10021,DOC,Doctor,https://www.nyccd.com/,,New York,12/19/2025 12:36 PM,1/20/2026 3:31 PM,Melissa  Manice,1/20/2026 12:00 AM,Yes,D,Dismissed,Lena Varone
+250797,{7D32BF08-0406-42C4-939D-128E47A29675},Valentina,Dokic,11231,PAT,Patient,,,Brooklyn ,,1/22/2026 12:00 AM,Marc Tell,1/22/2026 12:00 AM,Yes,D,Dismissed,Valentina Dokic
+250800,{AFCBFB6B-E94B-48B7-9EA5-4DAB4EC5A02E},Jeffrey and Jake,Shapiro,10006,DOC,Doctor,ismile.com,Jeff and Jake,New York,12/23/2025 12:22 PM,1/22/2026 12:00 AM,Jake Seigal,1/16/2026 12:00 AM,Yes,D,Dismissed,Jeffrey and Jake Shapiro
+260806,{1F9C28F1-B6E0-467F-97F6-E8C51526CC46},Jacqueline,Dikansky,10006,DOC,Doctor,,Jackie,New York,1/2/2026 9:18 AM,1/20/2026 12:00 AM,Sienna Elkhoury,1/6/2026 12:00 AM,Yes,D,Dismissed,Jacqueline Dikansky

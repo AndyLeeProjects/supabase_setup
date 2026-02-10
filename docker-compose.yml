@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  streamlit-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: master-data-app
+    restart: unless-stopped
+    ports:
+      # Port 8501 is free - no conflicts with your existing containers
+      - "8501:8501"
+    environment:
+      # For nginx-proxy integration (if you want to use your existing reverse proxy)
+      - VIRTUAL_HOST=${VIRTUAL_HOST:-master-data.yourdomain.com}
+      - VIRTUAL_PORT=8501
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST:-master-data.yourdomain.com}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-your-email@domain.com}
+      # Database connection environment variables
+      # These should be set in your .env file or passed at runtime
+      - DATABASE_URL=${DATABASE_URL}
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_SSLMODE=${DB_SSLMODE:-require}
+      
+      # Supabase specific (if using Supabase)
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      
+      # Streamlit configuration
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    volumes:
+      # Mount the app directory for development (remove in production)
+      - ./app:/app/app:ro
+      - ./utils:/app/utils:ro
+    networks:
+      - master-data-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  master-data-network:
+    driver: bridge
+  # Uncomment to connect to existing reverse proxy network
+  # default:
+  #   external:
+  #     name: your-existing-network-name
