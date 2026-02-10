@@ -4,6 +4,7 @@ from pathlib import Path
 
 # Add utils to path
 sys.path.append(str(Path(__file__).parent.parent / 'utils'))
+from cache_func import setup_auto_refresh, setup_sidebar_cache_controls
 
 st.set_page_config(
     page_title="Data Platform", 
@@ -17,6 +18,12 @@ def main():
     
     st.title("🏗️ Data Platform")
     st.markdown("### Comprehensive data management and analytics platform")
+    
+    # Auto-refresh setup
+    setup_auto_refresh()
+    
+    # Setup sidebar cache controls
+    setup_sidebar_cache_controls()
     
     # Architecture Overview
     st.markdown("## 🎯 Three-Layer Data Architecture")
@@ -118,7 +125,23 @@ def main():
     
     # Footer
     st.markdown("---")
-    st.info("💡 Use the sidebar to navigate between the **Master Data** and **Data Overview** sections.")
+    st.info("💡 Use the sidebar to navigate between **Master Data**, **ETL Pipeline**, and **Data Overview** sections.")
+    
+    # Quick navigation
+    st.subheader("🚀 Quick Start")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🏢 Manage Master Data", use_container_width=True):
+            st.switch_page("pages/1_🏢_Master_Data.py")
+    
+    with col2:
+        if st.button("🔄 Run ETL Pipeline", use_container_width=True):
+            st.switch_page("pages/2_🔄_ETL_Pipeline.py")
+    
+    with col3:
+        if st.button("📊 View Data Overview", use_container_width=True):
+            st.switch_page("pages/3_📊_Data_Overview.py")
 
 if __name__ == "__main__":
     main()

@@ -6,6 +6,10 @@ import pandas as pd
 # Add utils to path
 sys.path.append(str(Path(__file__).parent.parent.parent / 'utils'))
 from connect_db import get_engine
+from cache_func import (
+    get_clients_cached, get_practices_cached, get_providers_cached,
+    get_silver_gold_status_cached, refresh_all_caches, setup_auto_refresh, setup_sidebar_cache_controls
+)
 
 st.set_page_config(
     page_title="Data Overview", 
@@ -26,16 +30,14 @@ def get_schema_info():
         (SELECT COUNT(*) FROM information_schema.columns 
          WHERE table_schema = schemaname AND table_name = tablename) as column_count
     FROM pg_tables 
-    WHERE schemaname IN ('master', 'bronze_fin', 'bronze_ops', 'silver', 'silver_ops', 'gold', 'gold_ops')
+    WHERE schemaname IN ('master', 'bronze_fin', 'bronze_ops', 'silver_ops', 'gold_ops')
     ORDER BY 
         CASE schemaname
             WHEN 'master' THEN 1
             WHEN 'bronze_fin' THEN 2 
             WHEN 'bronze_ops' THEN 3
-            WHEN 'silver' THEN 4
-            WHEN 'silver_ops' THEN 5
-            WHEN 'gold' THEN 6
-            WHEN 'gold_ops' THEN 7
+            WHEN 'silver_ops' THEN 4
+            WHEN 'gold_ops' THEN 5
         END,
         tablename;
     """
@@ -115,8 +117,8 @@ def get_column_description(column_name, schema_name, table_name):
         'master': 'Core reference data',
         'bronze_fin': 'Raw financial data from source systems',
         'bronze_ops': 'Raw operational data from source systems', 
-        'silver': 'Cleaned and standardized data',
-        'gold': 'Business metrics and analytics-ready data'
+        'silver_ops': 'Cleaned and standardized operational data',
+        'gold_ops': 'Business metrics and analytics-ready operational data'
     }
     
     # Table-specific context for better descriptions
@@ -200,6 +202,12 @@ def main():
     st.title("📊 Data Overview & Exploration")
     st.markdown("Explore your database schemas and understand what data lives in each layer.")
     
+    # Auto-refresh setup
+    setup_auto_refresh()
+    
+    # Setup sidebar cache controls
+    setup_sidebar_cache_controls()
+    
     tab1, tab2 = st.tabs(["📈 Schema Overview", "🔍 Data Explorer"])
     
     with tab1:
@@ -231,7 +239,7 @@ def main():
                 st.markdown("---")
                 
                 # Schema breakdown by layer
-                for schema_name in ['master', 'bronze_fin', 'bronze_ops', 'silver', 'gold']:
+                for schema_name in ['master', 'bronze_fin', 'bronze_ops', 'silver_ops', 'gold_ops']:
                     schema_tables = schema_info[schema_info['schema_name'] == schema_name]
                     
                     if not schema_tables.empty:
@@ -240,16 +248,16 @@ def main():
                             'master': '🏛️',
                             'bronze_fin': '🥉',
                             'bronze_ops': '🥉', 
-                            'silver': '🥈',
-                            'gold': '🥇'
+                            'silver_ops': '🥈',
+                            'gold_ops': '🥇'
                         }
                         
                         schema_descriptions = {
                             'master': 'Core business entities and reference data',
                             'bronze_fin': 'Raw financial data from source systems',
                             'bronze_ops': 'Raw operational data from source systems',
-                            'silver': 'Cleaned and standardized data',
-                            'gold': 'Business-ready analytics and aggregations'
+                            'silver_ops': 'Cleaned and standardized operational data',
+                            'gold_ops': 'Business-ready operational analytics and aggregations'
                         }
                         
                         with st.expander(f"{schema_icons[schema_name]} **{schema_name.upper()} Schema** - {schema_descriptions[schema_name]}", expanded=True):

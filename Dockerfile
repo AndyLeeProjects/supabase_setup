@@ -22,6 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code
 COPY app/ ./app/
 COPY utils/ ./utils/
+COPY src/ ./src/
 
 # Create a non-root user
 RUN useradd -m -u 1000 streamlit && chown -R streamlit:streamlit /app
