@@ -33,7 +33,6 @@ def get_engine(use_pooler=True):
         else:
             # Final fallback to hardcoded for development
             print("Warning: Using hardcoded database connection. Set environment variables for production.")
-            DATABASE_URL = "postgresql://postgres.mdusbtytnzevfrrtnniz:Dkeow!9fdus*io@aws-1-us-east-1.pooler.supabase.com:6543/postgres"
     
     if use_pooler:
         # Disable SQLAlchemy client-side pooling for Transaction/Session Pooler
