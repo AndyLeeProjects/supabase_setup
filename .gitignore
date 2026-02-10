@@ -1,3 +1,6 @@
 /__pycache__
 /data
 /src
+
+.env
+.DS_Store
