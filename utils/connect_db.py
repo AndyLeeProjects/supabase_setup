@@ -16,8 +16,24 @@ def get_engine(use_pooler=True):
     Returns:
         engine: SQLAlchemy engine object
     """
-    # Using the working pooler connection string
-    DATABASE_URL = "postgresql://postgres.mdusbtytnzevfrrtnniz:Dkeow!9fdus*io@aws-1-us-east-1.pooler.supabase.com:6543/postgres"
+    # Try to get DATABASE_URL from environment first (for Docker/production)
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    
+    # Fallback to individual components if DATABASE_URL not set
+    if not DATABASE_URL:
+        db_host = os.getenv('DB_HOST', 'localhost')
+        db_port = os.getenv('DB_PORT', '5432')
+        db_name = os.getenv('DB_NAME', 'postgres')
+        db_user = os.getenv('DB_USER')
+        db_password = os.getenv('DB_PASSWORD')
+        db_sslmode = os.getenv('DB_SSLMODE', 'require')
+        
+        if db_user and db_password:
+            DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?sslmode={db_sslmode}"
+        else:
+            # Final fallback to hardcoded for development
+            print("Warning: Using hardcoded database connection. Set environment variables for production.")
+            DATABASE_URL = "postgresql://postgres.mdusbtytnzevfrrtnniz:Dkeow!9fdus*io@aws-1-us-east-1.pooler.supabase.com:6543/postgres"
     
     if use_pooler:
         # Disable SQLAlchemy client-side pooling for Transaction/Session Pooler
