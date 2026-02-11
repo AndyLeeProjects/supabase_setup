@@ -77,11 +77,61 @@ def get_providers(practice_id=None):
     """Get providers using cache"""
     return get_providers_cached(practice_id)
 
+def check_setup_completeness():
+    """Check which master data setups are complete vs incomplete"""
+    clients_df = get_clients()
+    practices_df = get_practices()
+    providers_df = get_providers()
+    
+    if clients_df.empty:
+        return {'status': 'no_clients'}
+    
+    if practices_df.empty:
+        return {'status': 'no_practices'}
+    
+    # Build client status list
+    client_status = []
+    practices_with_providers = set(providers_df['practice_id'].unique()) if not providers_df.empty else set()
+    
+    for _, client in clients_df.iterrows():
+        client_practices = practices_df[practices_df['client_id'] == client['id']]
+        
+        if client_practices.empty:
+            client_status.append({
+                'name': client['name'],
+                'issue': 'Missing practices'
+            })
+        else:
+            client_status.append({
+                'name': client['name'],
+                'issue': None
+            })
+    
+    # Build practice status list
+    practice_status = []
+    for _, practice in practices_df.iterrows():
+        if practice['id'] not in practices_with_providers:
+            practice_status.append({
+                'name': practice['practice_name'],
+                'issue': 'Missing providers'
+            })
+        else:
+            practice_status.append({
+                'name': practice['practice_name'],
+                'issue': None
+            })
+    
+    return {
+        'status': 'detailed',
+        'clients': client_status,
+        'practices': practice_status
+    }
+
 def main():
     """Master data management page"""
     
-    st.title("🏢 Master Data Management")
-    st.markdown("Set up the core entities that drive your business: clients, practices, and providers.")
+    st.title("Master Data Management")
+    st.markdown("Manage your core business entities: clients, practices, and providers.")
     
     # Auto-refresh setup
     setup_auto_refresh()
@@ -89,140 +139,179 @@ def main():
     # Setup sidebar cache controls
     setup_sidebar_cache_controls()
     
-    # Show setup progress/status
+    # Get current data
     clients_df = get_clients()
     practices_df = get_practices()
     providers_df = get_providers()
     
-    # Progress indicators
-    col1, col2, col3, col4 = st.columns(4)
+    # Status overview
+    col1, col2, col3 = st.columns(3)
+    
     with col1:
-        st.metric("👥 Clients", len(clients_df))
+        st.metric("Clients", len(clients_df))
     with col2:
-        st.metric("🏥 Practices", len(practices_df))
+        st.metric("Practices", len(practices_df))  
     with col3:
-        st.metric("👨‍⚕️ Providers", len(providers_df))
-    with col4:
-        if len(clients_df) > 0 and len(practices_df) > 0:
-            st.metric("✅ Setup", "Complete")
+        st.metric("Providers", len(providers_df))
+    
+    # Setup completeness check
+    status = check_setup_completeness()
+    
+    if status['status'] == 'no_clients':
+        st.info("Start by adding your first client")
+    
+    elif status['status'] == 'no_practices':
+        st.info("Add practices to your clients")
+    
+    else:
+        # Check if there are any issues
+        has_issues = any(c['issue'] for c in status['clients']) or any(p['issue'] for p in status['practices'])
+        
+        if has_issues:
+            with st.expander("⚠️ Incomplete Items", expanded=True):
+                # Show clients with issues
+                client_issues = [c for c in status['clients'] if c['issue']]
+                if client_issues:
+                    st.markdown("**Clients:**")
+                    for client in status['clients']:
+                        if client['issue']:
+                            st.markdown(f"⚠️ {client['name']} — {client['issue']}")
+                    st.markdown("")
+                
+                # Show practices with issues
+                practice_issues = [p for p in status['practices'] if p['issue']]
+                if practice_issues:
+                    st.markdown("**Practices:**")
+                    for practice in status['practices']:
+                        if practice['issue']:
+                            st.markdown(f"⚠️ {practice['name']} — {practice['issue']}")
         else:
-            st.metric("⏳ Setup", "Incomplete")
+            st.success("✅ All items configured")
     
     st.markdown("---")
     
-    # Determine current step based on existing data
-    if len(clients_df) == 0:
-        step = 1  # Need to add clients first
-    elif len(practices_df) == 0:
-        step = 2  # Have clients, need practices
-    elif len(providers_df) == 0:
-        step = 3  # Have clients and practices, need providers
-    else:
-        step = 4  # All setup, show overview
+    # Main tabs - flexible workflow
+    tab1, tab2, tab3, tab4 = st.tabs(["Add Entities", "View & Manage", "Bulk Import", "Data Relationships"])
     
-    # Progress bar
-    progress = (step - 1) / 3
-    st.progress(progress, text=f"Setup Progress: Step {step} of 4")
-    
-    # Main setup workflow
-    if step == 1:
-        # Step 1: Must add a client first
-        st.subheader("🏗️ Step 1: Add Your First Client")
-        st.info("💡 Start by adding a client organization. This is the top-level entity that will contain practices and providers.")
+    with tab1:
+        st.subheader("Add New Entities")
+        st.markdown("Add clients, practices, and providers in any order based on your needs.")
         
-        with st.form("client_setup_form", clear_on_submit=True):
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                client_name = st.text_input("Client Name *", placeholder="e.g., Wall Street Orthodontics")
-                client_slug = st.text_input("Client Slug *", placeholder="e.g., wall_street_ortho", help="Short identifier for data organization")
-            
-            with col2:
-                client_status = st.selectbox("Status", ["active", "inactive", "pending"], index=0)
-            
-            submitted = st.form_submit_button("➡️ Create Client & Continue", use_container_width=True, type="primary")
-            
-            if submitted:
-                if client_name and client_slug:
-                    try:
-                        client_data = {
-                            "name": client_name,
-                            "slug": client_slug.lower().replace(" ", "_"),
-                            "status": client_status
-                        }
-                        
-                        client_id = add_client(client_data)
-                        st.success(f"✅ Client '{client_name}' created successfully!")
-                        st.balloons()
-                        time.sleep(1)
-                        st.rerun()
-                        
-                    except Exception as e:
-                        st.error(f"❌ Error creating client: {str(e)}")
-                else:
-                    st.error("❌ Please fill in all required fields marked with *")
-    
-    elif step == 2:
-        # Step 2: Add practices to existing clients
-        st.subheader("🏗️ Step 2: Add Practice Locations")
-        st.info("💡 Now add practice locations for your clients. Each client can have multiple practices.")
+        # Entity type selection
+        entity_type = st.radio(
+            "What do you want to add?",
+            ["Client", "Practice", "Provider"],
+            horizontal=True
+        )
         
-        # Quick add practice form
-        with st.form("practice_quick_form", clear_on_submit=True):
+        if entity_type == "Client":
+            st.markdown("#### Add New Client")
+            st.markdown("*A client is the top-level organization that owns practices.*")
+            
+            with st.form("add_client_form", clear_on_submit=True):
                 col1, col2 = st.columns(2)
                 
                 with col1:
-                    client_options = dict(zip(clients_df['name'], clients_df['id']))
-                    selected_client = st.selectbox("Select Client *", options=list(client_options.keys()))
-                    client_id = client_options[selected_client]
-                    
-                    practice_name = st.text_input("Practice Name *", placeholder="e.g., Downtown Location")
-                    
-                with col2:
-                    practice_type_specific = st.text_input("Practice Type *", placeholder="e.g., Orthodontics")
-                    owner_name = st.text_input("Owner Name", placeholder="e.g., Dr. John Smith")
+                    client_name = st.text_input("Client Name *", placeholder="e.g., Wall Street Orthodontics")
+                    client_slug = st.text_input(
+                        "Client Slug *", 
+                        placeholder="e.g., wall_street_ortho",
+                        help="Short identifier used in data organization"
+                    )
                 
-                submitted = st.form_submit_button("Add Practice", use_container_width=True)
+                with col2:
+                    client_status = st.selectbox("Status", ["active", "inactive", "pending"], index=0)
+                
+                submitted = st.form_submit_button("Add Client", type="primary")
                 
                 if submitted:
-                    if practice_name and practice_type_specific:
+                    if client_name and client_slug:
                         try:
-                            practice_data = {
-                                "client_id": client_id,
-                                "name": practice_name,
-                                "practice_type_specific": practice_type_specific,
-                                "owner_name": owner_name if owner_name else None
+                            client_data = {
+                                "name": client_name,
+                                "slug": client_slug.lower().replace(" ", "_"),
+                                "status": client_status
                             }
                             
-                            practice_id = add_practice(practice_data)
-                            st.success(f"✅ Practice '{practice_name}' added successfully!")
+                            client_id = add_client(client_data)
+                            st.success(f"✅ Client '{client_name}' added successfully!")
+                            refresh_master_data_cache()
                             time.sleep(1)
                             st.rerun()
                             
                         except Exception as e:
-                            st.error(f"❌ Error adding practice: {str(e)}")
+                            st.error(f"❌ Error: {str(e)}")
                     else:
                         st.error("❌ Please fill in all required fields marked with *")
         
-    elif step == 3:
-        # Step 3: Add providers (optional but recommended)
-        st.subheader("🏗️ Step 3: Add Healthcare Providers")
-        st.info("💡 Add healthcare professionals to your practices. This step is optional but recommended for complete setup.")
-        
-        with st.form("provider_quick_form", clear_on_submit=True):
+        elif entity_type == "Practice":
+            st.markdown("#### Add New Practice")
+            st.markdown("*A practice is a location or business unit within a client organization.*")
+            
+            if clients_df.empty:
+                st.warning("⚠️ Add a client first before creating practices.")
+            else:
+                with st.form("add_practice_form", clear_on_submit=True):
                     col1, col2 = st.columns(2)
                     
                     with col1:
-                        practice_options = dict(zip([f"{row['client_name']} - {row['practice_name']}" for _, row in practices_df.iterrows()], practices_df['id']))
-                        selected_practice = st.selectbox("Select Practice *", options=list(practice_options.keys()))
+                        client_options = dict(zip(clients_df['name'], clients_df['id']))
+                        selected_client = st.selectbox("Client *", options=list(client_options.keys()))
+                        client_id = client_options[selected_client]
+                        
+                        practice_name = st.text_input("Practice Name *", placeholder="e.g., Downtown Location")
+                    
+                    with col2:
+                        practice_type = st.text_input("Practice Type", placeholder="e.g., Orthodontics")
+                        owner_name = st.text_input("Owner Name", placeholder="e.g., Dr. John Smith")
+                    
+                    submitted = st.form_submit_button("Add Practice", type="primary")
+                    
+                    if submitted:
+                        if practice_name:
+                            try:
+                                practice_data = {
+                                    "client_id": client_id,
+                                    "name": practice_name,
+                                    "practice_type_specific": practice_type if practice_type else None,
+                                    "owner_name": owner_name if owner_name else None
+                                }
+                                
+                                practice_id = add_practice(practice_data)
+                                st.success(f"✅ Practice '{practice_name}' added to {selected_client}!")
+                                refresh_master_data_cache()
+                                time.sleep(1)
+                                st.rerun()
+                                
+                            except Exception as e:
+                                st.error(f"❌ Error: {str(e)}")
+                        else:
+                            st.error("❌ Please enter a practice name")
+        
+        elif entity_type == "Provider":
+            st.markdown("#### Add New Provider")
+            st.markdown("*A provider is a healthcare professional working at a practice.*")
+            
+            if practices_df.empty:
+                st.warning("⚠️ Add a practice first before creating providers.")
+            else:
+                with st.form("add_provider_form", clear_on_submit=True):
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        practice_options = dict(zip(
+                            [f"{row['client_name']} - {row['practice_name']}" for _, row in practices_df.iterrows()],
+                            practices_df['id']
+                        ))
+                        selected_practice = st.selectbox("Practice *", options=list(practice_options.keys()))
                         practice_id = practice_options[selected_practice]
                         
                         provider_name = st.text_input("Provider Name *", placeholder="e.g., Dr. Jane Smith")
-                        
+                    
                     with col2:
                         provider_type = st.text_input("Provider Type", placeholder="e.g., Orthodontist")
                     
-                    submitted = st.form_submit_button("Add Provider", use_container_width=True)
+                    submitted = st.form_submit_button("Add Provider", type="primary")
                     
                     if submitted:
                         if provider_name:
@@ -234,116 +323,161 @@ def main():
                                 }
                                 
                                 provider_id = add_provider(provider_data)
-                                st.success(f"✅ Provider '{provider_name}' added successfully!")
+                                st.success(f"✅ Provider '{provider_name}' added to {selected_practice}!")
+                                refresh_master_data_cache()
                                 time.sleep(1)
                                 st.rerun()
                                 
                             except Exception as e:
-                                st.error(f"❌ Error adding provider: {str(e)}")
+                                st.error(f"❌ Error: {str(e)}")
                         else:
                             st.error("❌ Please enter a provider name")
+    
+    with tab2:
+        st.subheader("View & Manage Existing Data")
         
-        # Option to skip providers and continue to overview
-        st.markdown("---")
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("⏭️ Skip Providers & Continue", use_container_width=True):
-                st.info("Proceeding to overview without adding providers...")
-                time.sleep(1)
-                st.rerun()
-        with col2:
-            if st.button("📋 View Overview", use_container_width=True):
-                st.rerun()
-
-    # Data Overview Section
-    elif step == 4:
-        st.subheader("📋 Master Data Overview")
-        st.markdown("Complete summary of your master data entities and their relationships.")
+        view_type = st.radio(
+            "What do you want to view?",
+            ["All Data (Hierarchy)", "Clients Only", "Practices Only", "Providers Only"],
+            horizontal=True
+        )
         
-        # Quick Stats
-        col1, col2, col3 = st.columns(3)
-        
-        try:
-            # Get summary statistics
-            clients_df = pd.read_sql("SELECT * FROM master.clients", get_db_connection())
-            practices_df = pd.read_sql("SELECT * FROM master.practices", get_db_connection())
-            providers_df = pd.read_sql("SELECT * FROM master.providers", get_db_connection())
-            
-            with col1:
-                st.metric("👥 Total Clients", len(clients_df))
-                if not clients_df.empty:
-                    active_clients = len(clients_df[clients_df['status'] == 'active'])
-                    st.caption(f"{active_clients} active")
-            
-            with col2:
-                st.metric("🏥 Total Practices", len(practices_df))
-                if not practices_df.empty:
-                    active_practices = len(practices_df[practices_df['is_active'] == True])
-                    st.caption(f"{active_practices} active")
-            
-            with col3:
-                st.metric("👨‍⚕️ Total Providers", len(providers_df))
-                if not providers_df.empty:
-                    active_providers = len(providers_df[providers_df['is_active'] == True])
-                    st.caption(f"{active_providers} active")
-        
-        except Exception as e:
-            st.error(f"Error loading summary statistics: {e}")
-        
-        st.markdown("---")
-        
-        # Detailed hierarchical view
-        try:
-            # Join all data for hierarchical display
-            full_data = pd.read_sql("""
-                SELECT 
-                    c.name as client_name,
-                    c.status as client_status,
-                    p.name as practice_name,
-                    p.practice_type_specific,
-                    p.is_active as practice_active,
-                    pr.name as provider_name,
-                    pr.provider_type,
-                    pr.is_active as provider_active
-                FROM master.clients c
-                LEFT JOIN master.practices p ON c.id = p.client_id
-                LEFT JOIN master.providers pr ON p.id = pr.practice_id
-                ORDER BY c.name, p.name, pr.name
-            """, get_db_connection())
-            
-            if not full_data.empty:
-                st.subheader("🏗️ Data Hierarchy")
-                st.dataframe(full_data, use_container_width=True, hide_index=True)
-                
-                # Show summary by client
-                st.subheader("📊 Summary by Client")
-                client_summary = full_data.groupby('client_name').agg({
-                    'practice_name': 'nunique',
-                    'provider_name': 'nunique'
-                }).rename(columns={
-                    'practice_name': 'Practices',
-                    'provider_name': 'Providers'
-                })
-                st.dataframe(client_summary, use_container_width=True)
-                
+        if view_type == "All Data (Hierarchy)":
+            if not clients_df.empty:
+                # Get hierarchical view
+                try:
+                    engine = get_db_connection()
+                    query = """
+                    SELECT 
+                        c.name as client_name,
+                        c.slug as client_slug,
+                        c.status as client_status,
+                        p.name as practice_name,
+                        p.practice_type_specific,
+                        pr.name as provider_name,
+                        pr.provider_type
+                    FROM master.clients c
+                    LEFT JOIN master.practices p ON c.id = p.client_id
+                    LEFT JOIN master.providers pr ON p.id = pr.practice_id
+                    ORDER BY c.name, p.name, pr.name
+                    """
+                    hierarchy_df = pd.read_sql(query, engine)
+                    
+                    # Show as expandable sections by client
+                    for client_name in hierarchy_df['client_name'].unique():
+                        client_data = hierarchy_df[hierarchy_df['client_name'] == client_name]
+                        client_practices = client_data['practice_name'].dropna().unique()
+                        total_providers = len(client_data['provider_name'].dropna())
+                        
+                        with st.expander(f"**{client_name}** ({len(client_practices)} practices, {total_providers} providers)", expanded=False):
+                            if len(client_practices) > 0:
+                                for practice_name in client_practices:
+                                    if pd.notna(practice_name):
+                                        practice_data = client_data[client_data['practice_name'] == practice_name]
+                                        providers_in_practice = practice_data['provider_name'].dropna()
+                                        
+                                        st.markdown(f"**📍 {practice_name}**")
+                                        if practice_data.iloc[0]['practice_type_specific']:
+                                            st.caption(f"Type: {practice_data.iloc[0]['practice_type_specific']}")
+                                        
+                                        if len(providers_in_practice) > 0:
+                                            for provider in providers_in_practice:
+                                                provider_row = practice_data[practice_data['provider_name'] == provider].iloc[0]
+                                                provider_type = provider_row['provider_type']
+                                                if provider_type:
+                                                    st.markdown(f"  • **{provider}** ({provider_type})")
+                                                else:
+                                                    st.markdown(f"  • **{provider}**")
+                                        else:
+                                            st.markdown("  • *No providers assigned*")
+                                        st.markdown("")
+                            else:
+                                st.markdown("*No practices configured for this client*")
+                    
+                except Exception as e:
+                    st.error(f"Error loading hierarchy: {e}")
             else:
-                st.info("No master data found. Complete the setup steps above to populate your master data.")
+                st.info("No data to display. Add some entities first!")
+        
+        elif view_type == "Clients Only":
+            if not clients_df.empty:
+                st.dataframe(
+                    clients_df[['name', 'slug', 'status', 'created_at']],
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.info("No clients found.")
+        
+        elif view_type == "Practices Only":
+            if not practices_df.empty:
+                display_practices = practices_df[['client_name', 'practice_name', 'practice_type_specific', 'owner_name', 'is_active']]
+                st.dataframe(display_practices, use_container_width=True, hide_index=True)
+            else:
+                st.info("No practices found.")
+        
+        elif view_type == "Providers Only":
+            if not providers_df.empty:
+                display_providers = providers_df[['client_name', 'practice_name', 'provider_name', 'provider_type', 'is_active']]
+                st.dataframe(display_providers, use_container_width=True, hide_index=True)
+            else:
+                st.info("No providers found.")
+    
+    with tab3:
+        st.subheader("Bulk Import")
+        st.markdown("*Coming soon: Import multiple entities from CSV or Excel files.*")
+        st.info("This feature will allow you to upload spreadsheets with client, practice, and provider data for bulk creation.")
+    
+    with tab4:
+        st.subheader("Data Relationships")
+        
+        if not clients_df.empty:
+            # Summary statistics
+            st.markdown("#### Relationship Summary")
+            
+            summary_col1, summary_col2, summary_col3 = st.columns(3)
+            
+            with summary_col1:
+                practices_per_client = practices_df.groupby('client_id').size().mean() if not practices_df.empty else 0
+                st.metric("Avg Practices per Client", f"{practices_per_client:.1f}")
+            
+            with summary_col2:
+                providers_per_practice = providers_df.groupby('practice_id').size().mean() if not providers_df.empty else 0  
+                st.metric("Avg Providers per Practice", f"{providers_per_practice:.1f}")
+            
+            with summary_col3:
+                total_relationships = len(practices_df) + len(providers_df)
+                st.metric("Total Relationships", total_relationships)
+            
+            # Show detailed breakdown
+            if not practices_df.empty:
+                st.markdown("#### Detailed Breakdown")
                 
-        except Exception as e:
-            st.error(f"Error loading detailed overview: {e}")
-        
-        # Action buttons for next steps
-        st.markdown("---")
-        st.subheader("🚀 Ready for Next Steps")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("🔄 Process ETL Pipeline", use_container_width=True):
-                st.switch_page("pages/2_🔄_ETL_Pipeline.py")
-        
-        with col2:
-            if st.button("📊 View Data Analytics", use_container_width=True):
-                st.switch_page("pages/3_📊_Data_Overview.py")
+                breakdown_data = []
+                for _, client in clients_df.iterrows():
+                    client_practices = practices_df[practices_df['client_id'] == client['id']]
+                    total_providers = 0
+                    for _, practice in client_practices.iterrows():
+                        practice_providers = providers_df[providers_df['practice_id'] == practice['id']]
+                        total_providers += len(practice_providers)
+                    
+                    breakdown_data.append({
+                        'Client': client['name'],
+                        'Practices': len(client_practices),
+                        'Providers': total_providers,
+                        'Status': client['status']
+                    })
+                
+                if breakdown_data:
+                    breakdown_df = pd.DataFrame(breakdown_data)
+                    st.dataframe(breakdown_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("No data available for relationship analysis.")
+    
+    # Quick actions footer
+    st.markdown("---")
+    st.markdown("#### Next Steps")
+    st.info("Use the sidebar to navigate to **ETL Pipeline** to process your data, or **Data Overview** to explore tables.")
 
 if __name__ == "__main__":
     main()
