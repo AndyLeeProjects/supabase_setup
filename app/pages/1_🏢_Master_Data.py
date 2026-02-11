@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 import pandas as pd
 import time
+from datetime import date
 from sqlalchemy import text
 
 # Add utils to path
@@ -27,18 +28,17 @@ def get_db_connection():
 def add_client(client_data):
     """Add client to database"""
     engine = get_db_connection()
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         result = conn.execute(
             text("INSERT INTO master.clients (name, slug, status) VALUES (:name, :slug, :status) RETURNING id"),
             client_data
         )
-        conn.commit()
         return result.fetchone()[0]
 
 def add_practice(practice_data):
     """Add practice to database"""
     engine = get_db_connection()
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         result = conn.execute(
             text("""
             INSERT INTO master.practices (client_id, name, practice_type_specific, owner_name) 
@@ -47,13 +47,12 @@ def add_practice(practice_data):
             """),
             practice_data
         )
-        conn.commit()
         return result.fetchone()[0]
 
 def add_provider(provider_data):
     """Add provider to database"""
     engine = get_db_connection()
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         result = conn.execute(
             text("""
             INSERT INTO master.providers (practice_id, name, provider_type) 
@@ -62,8 +61,62 @@ def add_provider(provider_data):
             """),
             provider_data
         )
-        conn.commit()
         return result.fetchone()[0]
+
+def add_appointment_type_mapping(mapping_data):
+    """Add appointment type mapping to database"""
+    engine = get_db_connection()
+    with engine.begin() as conn:
+        result = conn.execute(
+            text("""
+            INSERT INTO master.appointment_type_mappings 
+                (client_id, practice_id, source_appointment_type, standardized_category, 
+                 start_date, end_date, notes) 
+            VALUES (:client_id, :practice_id, :source_appointment_type, :standardized_category, 
+                    :start_date, :end_date, :notes) 
+            RETURNING id
+            """),
+            mapping_data
+        )
+        return result.fetchone()[0]
+
+def get_appointment_type_mappings(client_id=None, include_inactive=False):
+    """Get appointment type mappings"""
+    engine = get_db_connection()
+    
+    query = """
+    SELECT 
+        m.id,
+        m.client_id,
+        c.name as client_name,
+        m.practice_id,
+        p.name as practice_name,
+        m.source_appointment_type,
+        m.standardized_category,
+        m.start_date,
+        m.end_date,
+        m.notes,
+        CASE 
+            WHEN m.end_date IS NULL OR m.end_date >= CURRENT_DATE THEN 'Active'
+            ELSE 'Inactive'
+        END as status
+    FROM master.appointment_type_mappings m
+    JOIN master.clients c ON m.client_id = c.id
+    LEFT JOIN master.practices p ON m.practice_id = p.id
+    WHERE 1=1
+    """
+    
+    params = {}
+    if client_id:
+        query += " AND m.client_id = :client_id"
+        params['client_id'] = client_id
+    
+    if not include_inactive:
+        query += " AND (m.end_date IS NULL OR m.end_date >= CURRENT_DATE)"
+    
+    query += " ORDER BY c.name, m.standardized_category, m.source_appointment_type"
+    
+    return pd.read_sql(text(query), engine, params=params)
 
 def get_clients():
     """Get all clients using cache"""
@@ -200,7 +253,7 @@ def main():
         # Entity type selection
         entity_type = st.radio(
             "What do you want to add?",
-            ["Client", "Practice", "Provider"],
+            ["Client", "Practice", "Provider", "Appointment Type Mapping"],
             horizontal=True
         )
         
@@ -332,13 +385,136 @@ def main():
                                 st.error(f"❌ Error: {str(e)}")
                         else:
                             st.error("❌ Please enter a provider name")
+        
+        elif entity_type == "Appointment Type Mapping":
+            st.markdown("#### Add Appointment Type Mapping(s)")
+            st.markdown("*Map source appointment codes to standardized categories. Enter multiple codes (one per line) for bulk entry.*")
+            
+            if clients_df.empty:
+                st.warning("⚠️ Add a client first before creating appointment type mappings.")
+            else:
+                with st.form("add_apt_mapping_form", clear_on_submit=True):
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        client_options = dict(zip(clients_df['name'], clients_df['id']))
+                        selected_client = st.selectbox("Client *", options=list(client_options.keys()))
+                        client_id = client_options[selected_client]
+                        
+                        # Get practices for selected client
+                        client_practices = practices_df[practices_df['client_id'] == client_id]
+                        practice_scope = st.radio(
+                            "Mapping Scope *",
+                            ["All Practices (Client-wide)", "Specific Practice"],
+                            index=1,
+                            help="Apply this mapping to all practices or just one?"
+                        )
+                        
+                        practice_id = None
+                        if practice_scope == "Specific Practice":
+                            if not client_practices.empty:
+                                practice_options = dict(zip(client_practices['practice_name'], client_practices['id']))
+                                selected_practice = st.selectbox("Practice *", options=list(practice_options.keys()))
+                                practice_id = practice_options[selected_practice]
+                            else:
+                                st.warning("No practices found for this client.")
+                        
+                        source_types = st.text_area(
+                            "Source Appointment Type(s) *",
+                            placeholder="Enter one or more codes (one per line):\nNPE\nNew Pt\nInitial Consult",
+                            help="Enter appointment type codes from source system. One per line for bulk entry.",
+                            height=120
+                        )
+                    
+                    with col2:
+                        standardized_category = st.selectbox(
+                            "Standardized Category *",
+                            ["New Patient", "Recall", "Follow-Up", "Emergency", "Consultation", "Treatment", "Other"],
+                            help="What should this appointment type be categorized as?"
+                        )
+                        
+                        col2a, col2b = st.columns(2)
+                        with col2a:
+                            start_date = st.date_input(
+                                "Start Date *",
+                                value=date(2025, 1, 1),
+                                help="When does this mapping become effective?"
+                            )
+                        with col2b:
+                            has_end_date = st.checkbox("Set End Date")
+                            end_date = None
+                            if has_end_date:
+                                end_date = st.date_input(
+                                    "End Date",
+                                    help="When does this mapping expire? Leave unchecked for indefinite."
+                                )
+                        
+                        notes = st.text_area(
+                            "Notes (Optional)",
+                            placeholder="Additional context about this mapping...",
+                            height=100
+                        )
+                    
+                    submitted = st.form_submit_button("Add Mapping(s)", type="primary")
+                    
+                    if submitted:
+                        if source_types and standardized_category:
+                            try:
+                                # Split by newlines and clean up
+                                source_type_list = [s.strip() for s in source_types.split('\n') if s.strip()]
+                                
+                                if not source_type_list:
+                                    st.error("❌ Please enter at least one source appointment type")
+                                else:
+                                    success_count = 0
+                                    failed_types = []
+                                    
+                                    scope_text = f"{selected_practice}" if practice_id else "all practices"
+                                    
+                                    for source_type in source_type_list:
+                                        try:
+                                            mapping_data = {
+                                                "client_id": client_id,
+                                                "practice_id": practice_id,
+                                                "source_appointment_type": source_type,
+                                                "standardized_category": standardized_category,
+                                                "start_date": start_date,
+                                                "end_date": end_date if has_end_date else None,
+                                                "notes": notes if notes else None
+                                            }
+                                            
+                                            add_appointment_type_mapping(mapping_data)
+                                            success_count += 1
+                                        except Exception as e:
+                                            failed_types.append(f"{source_type}: {str(e)}")
+                                    
+                                    # Show results
+                                    if success_count > 0:
+                                        if success_count == 1:
+                                            st.success(f"✅ Mapping '{source_type_list[0]}' → '{standardized_category}' added for {selected_client} ({scope_text})!")
+                                        else:
+                                            st.success(f"✅ {success_count} mappings added for {selected_client} ({scope_text}) → '{standardized_category}'")
+                                    
+                                    if failed_types:
+                                        st.error(f"❌ {len(failed_types)} failed:")
+                                        for failure in failed_types:
+                                            st.caption(f"• {failure}")
+                                    
+                                    if success_count > 0:
+                                        time.sleep(1.5)
+                                        st.rerun()
+                                
+                            except Exception as e:
+                                st.error(f"❌ Error: {str(e)}")
+                        else:
+                            st.error("❌ Please fill in all required fields marked with *")
     
     with tab2:
         st.subheader("View & Manage Existing Data")
         
         view_type = st.radio(
             "What do you want to view?",
-            ["All Data (Hierarchy)", "Clients Only", "Practices Only", "Providers Only"],
+            ["All Data (Hierarchy)", "Clients Only", "Practices Only", "Providers Only", "Appointment Type Mappings"],
             horizontal=True
         )
         
@@ -422,6 +598,70 @@ def main():
                 st.dataframe(display_providers, use_container_width=True, hide_index=True)
             else:
                 st.info("No providers found.")
+        
+        elif view_type == "Appointment Type Mappings":
+            st.markdown("#### Appointment Type Mappings")
+            
+            # Filter options
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                if not clients_df.empty:
+                    client_filter = st.selectbox(
+                        "Filter by Client",
+                        ["All Clients"] + list(clients_df['name'].tolist())
+                    )
+                    filter_client_id = None
+                    if client_filter != "All Clients":
+                        filter_client_id = clients_df[clients_df['name'] == client_filter].iloc[0]['id']
+                else:
+                    filter_client_id = None
+            
+            with col2:
+                include_inactive = st.checkbox("Include Inactive", value=False)
+            
+            # Load mappings
+            try:
+                mappings_df = get_appointment_type_mappings(filter_client_id, include_inactive)
+                
+                if not mappings_df.empty:
+                    # Display statistics
+                    stat_col1, stat_col2, stat_col3 = st.columns(3)
+                    with stat_col1:
+                        st.metric("Total Mappings", len(mappings_df))
+                    with stat_col2:
+                        active_count = len(mappings_df[mappings_df['status'] == 'Active'])
+                        st.metric("Active Mappings", active_count)
+                    with stat_col3:
+                        unique_categories = mappings_df['standardized_category'].nunique()
+                        st.metric("Categories", unique_categories)
+                    
+                    st.markdown("---")
+                    
+                    # Display by category
+                    for category in mappings_df['standardized_category'].unique():
+                        category_mappings = mappings_df[mappings_df['standardized_category'] == category]
+                        
+                        with st.expander(f"**{category}** ({len(category_mappings)} mappings)", expanded=True):
+                            display_cols = [
+                                'client_name', 'practice_name', 'source_appointment_type', 
+                                'start_date', 'end_date', 'status', 'notes'
+                            ]
+                            display_data = category_mappings[display_cols].copy()
+                            display_data.columns = [
+                                'Client', 'Practice', 'Source Type', 
+                                'Start Date', 'End Date', 'Status', 'Notes'
+                            ]
+                            
+                            # Replace None with "All Practices"
+                            display_data['Practice'] = display_data['Practice'].fillna('All Practices')
+                            
+                            st.dataframe(display_data, use_container_width=True, hide_index=True)
+                else:
+                    st.info("No appointment type mappings found. Add some in the 'Add Entities' tab!")
+            
+            except Exception as e:
+                st.error(f"Error loading appointment type mappings: {str(e)}")
+                st.info("💡 Tip: Make sure you've created the appointment_type_mappings table. Check the SQL file in the project.")
     
     with tab3:
         st.subheader("Bulk Import")

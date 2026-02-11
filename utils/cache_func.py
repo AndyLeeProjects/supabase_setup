@@ -262,7 +262,7 @@ def get_silver_gold_status_cached() -> Dict[str, Any]:
     }
     
     # Silver layer tables
-    silver_tables = ['fact_new_patient_intake', 'fact_patient_treatments', 'fact_referrals']
+    silver_tables = ['referrals', 'fact_patient_treatments', 'fact_referrals']
     for table in silver_tables:
         try:
             query = f"""

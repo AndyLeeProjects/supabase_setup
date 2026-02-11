@@ -7,9 +7,10 @@ This script transforms raw bronze layer data into cleaned silver facts
 and aggregated gold metrics for reporting.
 
 Bronze → Silver:
-- Extract new patient appointments from bronze_ops.appointments_raw_wso
+- Extract all appointments from bronze_ops.appointments_raw_wso
 - Join with referral data from bronze_ops.referrals_raw_wso  
-- Apply client-specific mappings and create canonical facts in silver_ops.fact_new_patient_intake
+- Apply client-specific mappings and create canonical facts in silver_ops.referrals
+- Mark appointments as 'New Patient' using appointment_type_mappings
 
 Silver → Gold:
 - Aggregate silver facts into monthly summaries in gold_ops.referrals_monthly_summary
@@ -31,6 +32,26 @@ from sqlalchemy import text
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Client-specific ETL configuration for referrals pipeline
+CLIENT_ETL_CONFIG = {
+    'Wall Street Orthodontics': {
+        'min_appointment_date': '2025-01-01',  # Only process appointments from this date onwards
+        'description': 'Appointments from 2025-01-01 onwards'
+    }
+    # Add more clients here as needed
+    # 'Another Client': {
+    #     'min_appointment_date': '2024-01-01',
+    #     'description': 'Appointments from 2024-01-01 onwards'
+    # }
+}
+
+def get_client_etl_config(client_name):
+    """Get ETL configuration for a specific client"""
+    config = CLIENT_ETL_CONFIG.get(client_name, {})
+    min_date = config.get('min_appointment_date', '2020-01-01')  # Default to 2020 if not specified
+    logger.info(f"ETL config for {client_name}: min_appointment_date = {min_date}")
+    return min_date
 
 def get_client_id(connection, client_name='Wall Street Orthodontics'):
     """Get client ID for Wall Street Orthodontics"""
@@ -55,7 +76,6 @@ def get_client_id(connection, client_name='Wall Street Orthodontics'):
             'slug': slug, 
             'status': 'active'
         }).fetchone()
-        connection.commit()
         logger.info(f"Created new client: {client_name}")
         return str(result[0])
 
@@ -84,9 +104,64 @@ def get_practice_id(connection, client_id, practice_name='Wall Street Orthodonti
             'name': practice_name,
             'is_active': True
         }).fetchone()
-        connection.commit()
         logger.info(f"Created new practice: {practice_name}")
         return str(result[0])
+
+def ensure_silver_table_exists(connection):
+    """Create silver.referrals table if it doesn't exist"""
+    logger.info("Ensuring silver table exists...")
+    
+    create_table_sql = """
+    CREATE TABLE IF NOT EXISTS silver_ops.referrals (
+        id UUID NOT NULL DEFAULT gen_random_uuid(),
+        
+        client_id UUID NOT NULL,
+        practice_id UUID NOT NULL,
+        
+        patient_id_guid TEXT NOT NULL,
+        patient_id TEXT,
+        
+        appointment_date DATE NOT NULL,
+        appointment_type TEXT,
+        appointment_status TEXT,
+        is_new_patient BOOLEAN DEFAULT FALSE,
+        
+        time_period_id UUID NOT NULL,
+        
+        referral_category TEXT,
+        referral_name TEXT,
+        
+        source_system TEXT NOT NULL DEFAULT 'practice_management',
+        
+        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+        
+        CONSTRAINT referrals_pkey PRIMARY KEY (id),
+        CONSTRAINT referrals_client_id_fkey 
+            FOREIGN KEY (client_id) REFERENCES master.clients(id),
+        CONSTRAINT referrals_practice_id_fkey 
+            FOREIGN KEY (practice_id) REFERENCES master.practices(id),
+        CONSTRAINT referrals_time_period_id_fkey 
+            FOREIGN KEY (time_period_id) REFERENCES master.time_periods(id),
+        CONSTRAINT referrals_unique 
+            UNIQUE (client_id, practice_id, patient_id_guid)
+    );
+    
+    CREATE INDEX IF NOT EXISTS idx_referrals_client_practice_period
+        ON silver_ops.referrals (client_id, practice_id, time_period_id);
+    
+    CREATE INDEX IF NOT EXISTS idx_referrals_client_practice_date
+        ON silver_ops.referrals (client_id, practice_id, appointment_date);
+    
+    CREATE INDEX IF NOT EXISTS idx_referrals_is_new_patient
+        ON silver_ops.referrals (client_id, practice_id, is_new_patient);
+    
+    CREATE INDEX IF NOT EXISTS idx_referrals_category
+        ON silver_ops.referrals (client_id, practice_id, referral_category);
+    """
+    
+    connection.execute(text(create_table_sql))
+    logger.info("✅ Silver table ready")
 
 def ensure_time_periods(connection):
     """Ensure time periods exist for the data range"""
@@ -106,27 +181,25 @@ def ensure_time_periods(connection):
     ON CONFLICT (period_type, start_date, end_date) DO NOTHING;
     """
     connection.execute(text(time_periods_sql))
-    connection.commit()
 
 def create_appointment_type_mappings(connection, client_id):
-    """Create appointment type mappings for Wall Street Orthodontics"""
+    """Create appointment type mappings for Wall Street Orthodontics using new schema"""
     logger.info("Creating appointment type mappings...")
     
     mappings_sql = """
-    INSERT INTO master.client_appointment_type_mappings 
-    (client_id, domain, source_system, appointment_type_code, canonical_type, notes)
+    INSERT INTO master.appointment_type_mappings 
+    (client_id, practice_id, source_appointment_type, standardized_category, start_date, end_date, notes)
     VALUES 
-    (:client_id, 'ops', 'practice_management', 'EXAM ADULT LS, ITERO SCAN, PHOTOS, CBCT', 'new_patient_intake', 'Adult exam with full diagnostic records'),
-    (:client_id, 'ops', 'practice_management', 'LS EXAM, ITERO SCAN, 1 SMILING PHOTO (TO EVAL IF ELIGIBILE FOR C5)', 'new_patient_intake', 'Adult exam for clear aligner evaluation'),
-    (:client_id, 'ops', 'practice_management', 'EXAM CHILD LS, ITERO SCAN, PHOTOS, CBCT', 'new_patient_intake', 'Child exam with full diagnostic records'),
-    (:client_id, 'ops', 'practice_management', 'DIAGNOSTIC RECORDS - PHOTOS, CBCT, ITERO SCAN', 'new_patient_intake', 'Diagnostic records appointment'),
-    (:client_id, 'ops', 'practice_management', 'P-Consultation', 'new_patient_intake', 'Patient consultation'),
-    (:client_id, 'ops', 'practice_management', 'EXAM TRANSFER IN CHILD LS', 'new_patient_intake', 'Transfer patient examination')
-    ON CONFLICT (client_id, source_system, appointment_type_code, canonical_type) DO NOTHING;
+    (:client_id, NULL, 'EXAM ADULT LS, ITERO SCAN, PHOTOS, CBCT', 'New Patient', '2024-01-01', NULL, 'Adult exam with full diagnostic records'),
+    (:client_id, NULL, 'LS EXAM, ITERO SCAN, 1 SMILING PHOTO (TO EVAL IF ELIGIBILE FOR C5)', 'New Patient', '2024-01-01', NULL, 'Adult exam for clear aligner evaluation'),
+    (:client_id, NULL, 'EXAM CHILD LS, ITERO SCAN, PHOTOS, CBCT', 'New Patient', '2024-01-01', NULL, 'Child exam with full diagnostic records'),
+    (:client_id, NULL, 'DIAGNOSTIC RECORDS - PHOTOS, CBCT, ITERO SCAN', 'New Patient', '2024-01-01', NULL, 'Diagnostic records appointment'),
+    (:client_id, NULL, 'P-Consultation', 'New Patient', '2024-01-01', NULL, 'Patient consultation'),
+    (:client_id, NULL, 'EXAM TRANSFER IN CHILD LS', 'New Patient', '2024-01-01', NULL, 'Transfer patient examination')
+    ON CONFLICT (client_id, practice_id, source_appointment_type, start_date) DO NOTHING;
     """
     
     connection.execute(text(mappings_sql), {'client_id': client_id})
-    connection.commit()
 
 def create_referral_category_mappings(connection, client_id):
     """Create referral category mappings for Wall Street Orthodontics"""
@@ -147,31 +220,46 @@ def create_referral_category_mappings(connection, client_id):
     """
     
     connection.execute(text(mappings_sql), {'client_id': client_id})
-    connection.commit()
 
-def extract_transform_to_silver(connection, client_id, practice_id):
-    """Extract bronze data and transform to silver layer"""
-    logger.info("Transforming bronze → silver...")    
+def extract_transform_to_silver(connection, client_id, practice_id, client_name='Wall Street Orthodontics'):
+    """Extract bronze data and transform to silver layer
+    
+    Creates one row per unique patient with their EARLIEST appointment date.
+    Applies client-specific date filters from CLIENT_ETL_CONFIG.
+    """
+    logger.info("Transforming bronze → silver...")
+    
+    # Get client-specific configuration
+    min_appointment_date = get_client_etl_config(client_name)
+    
     # Clear existing data for this client/practice
     clear_silver_sql = """
-    DELETE FROM silver_ops.fact_new_patient_intake 
+    DELETE FROM silver_ops.referrals 
     WHERE client_id = CAST(:client_id AS uuid) 
     AND practice_id = CAST(:practice_id AS uuid);
     """
     connection.execute(text(clear_silver_sql), {'client_id': client_id, 'practice_id': practice_id})
-    connection.commit()
     
-    # Transform bronze to silver
+    # Transform bronze to silver - ONE ROW PER PATIENT with their EARLIEST appointment
+    # Applies custom date filtering per client
     transform_sql = """
-    INSERT INTO silver_ops.fact_new_patient_intake 
-    (client_id, practice_id, patient_id_guid, patient_id, intake_date, time_period_id, 
+    INSERT INTO silver_ops.referrals 
+    (client_id, practice_id, patient_id_guid, patient_id, appointment_date, 
+     appointment_type, appointment_status, is_new_patient, time_period_id, 
      referral_category, referral_name, source_system)
-    SELECT 
+    SELECT DISTINCT ON (patient_id_guid)
         CAST(:client_id AS uuid) as client_id,
         CAST(:practice_id AS uuid) as practice_id,
         CAST(REPLACE(REPLACE(a.patient_id_guid, '{', ''), '}', '') AS uuid) as patient_id_guid,
         a.patient_id,
-        a.appointment_date::date as intake_date,
+        a.appointment_date::date as appointment_date,
+        a.appointment_type_description as appointment_type,
+        a.appointment_status_description as appointment_status,
+        -- Mark as New Patient if it matches appointment type mappings
+        CASE 
+            WHEN atm.id IS NOT NULL THEN TRUE
+            ELSE FALSE
+        END as is_new_patient,
         tp.id as time_period_id,
         COALESCE(rcm.canonical_referral_category, 
                  CASE 
@@ -185,18 +273,14 @@ def extract_transform_to_silver(connection, client_id, practice_id):
                  END) as referral_category,
         CONCAT(r.referred_in_by_first_name, ' ', r.referred_in_by_last_name) as referral_name,
         'practice_management' as source_system
-    FROM (
-        -- Get first appointment per patient that matches new patient intake criteria
-        SELECT DISTINCT ON (a.patient_id_guid)
-            a.*
-        FROM bronze_ops.appointments_raw_wso a
-        INNER JOIN master.client_appointment_type_mappings atm 
-            ON atm.client_id = CAST(:client_id AS uuid)
-            AND atm.canonical_type = 'new_patient_intake'
-            AND a.appointment_type_description = atm.appointment_type_code
-        WHERE a.patient_id_guid IS NOT NULL
-        ORDER BY a.patient_id_guid, a.appointment_date
-    ) a
+    FROM bronze_ops.appointments_raw_wso a
+    LEFT JOIN master.appointment_type_mappings atm 
+        ON atm.client_id = CAST(:client_id AS uuid)
+        AND atm.standardized_category = 'New Patient'
+        AND a.appointment_type_description = atm.source_appointment_type
+        AND a.appointment_date::date >= atm.start_date
+        AND (atm.end_date IS NULL OR a.appointment_date::date <= atm.end_date)
+        AND (atm.practice_id IS NULL OR atm.practice_id = CAST(:practice_id AS uuid))
     LEFT JOIN bronze_ops.referrals_raw_wso r 
         ON REPLACE(REPLACE(a.patient_id_guid, '{', ''), '}', '') = REPLACE(REPLACE(r.patient_id_guid, '{', ''), '}', '')
     LEFT JOIN master.client_referral_category_mappings rcm 
@@ -207,14 +291,19 @@ def extract_transform_to_silver(connection, client_id, practice_id):
         AND a.appointment_date::date >= tp.start_date 
         AND a.appointment_date::date <= tp.end_date
     WHERE a.appointment_date IS NOT NULL
-    ON CONFLICT (client_id, practice_id, patient_id_guid) DO NOTHING;
+        AND a.patient_id_guid IS NOT NULL
+        AND a.appointment_date::date >= CAST(:min_appointment_date AS date)
+    ORDER BY patient_id_guid, a.appointment_date ASC;
     """
     
-    result = connection.execute(text(transform_sql), {'client_id': client_id, 'practice_id': practice_id})
+    result = connection.execute(text(transform_sql), {
+        'client_id': client_id, 
+        'practice_id': practice_id,
+        'min_appointment_date': min_appointment_date
+    })
     rows_inserted = result.rowcount
-    connection.commit()
     
-    logger.info(f"✅ Inserted {rows_inserted} rows into silver_ops.fact_new_patient_intake")
+    logger.info(f"✅ Inserted {rows_inserted} unique patients into silver_ops.referrals (filtered: appointments >= {min_appointment_date})")
     return rows_inserted
 
 def aggregate_to_gold_summary(connection, client_id, practice_id):
@@ -240,9 +329,11 @@ def aggregate_to_gold_summary(connection, client_id, practice_id):
             time_period_id,
             COUNT(*) as monthly_new_patient_cnt,
             tp.start_date
-        FROM silver_ops.fact_new_patient_intake f
+        FROM silver_ops.referrals f
         INNER JOIN master.time_periods tp ON f.time_period_id = tp.id
-        WHERE client_id = CAST(:client_id AS uuid) AND practice_id = CAST(:practice_id AS uuid)
+        WHERE client_id = CAST(:client_id AS uuid) 
+            AND practice_id = CAST(:practice_id AS uuid)
+            AND is_new_patient = TRUE
         GROUP BY client_id, practice_id, time_period_id, tp.start_date
     ),
     with_l3m AS (
@@ -281,7 +372,7 @@ def aggregate_to_gold_summary(connection, client_id, practice_id):
     
     result = connection.execute(text(aggregate_sql), {'client_id': client_id, 'practice_id': practice_id})
     rows_inserted = result.rowcount
-    connection.commit()
+
     
     logger.info(f"✅ Inserted {rows_inserted} rows into gold_ops.referrals_monthly_summary")
     return rows_inserted
@@ -306,8 +397,10 @@ def aggregate_to_gold_breakdown(connection, client_id, practice_id):
         SELECT 
             client_id, practice_id, time_period_id,
             COUNT(*) as total_monthly_cnt
-        FROM silver_ops.fact_new_patient_intake
-        WHERE client_id = CAST(:client_id AS uuid) AND practice_id = CAST(:practice_id AS uuid)
+        FROM silver_ops.referrals
+        WHERE client_id = CAST(:client_id AS uuid) 
+            AND practice_id = CAST(:practice_id AS uuid)
+            AND is_new_patient = TRUE
         GROUP BY client_id, practice_id, time_period_id
     ),
     category_breakdown AS (
@@ -318,12 +411,14 @@ def aggregate_to_gold_breakdown(connection, client_id, practice_id):
             f.referral_category,
             COUNT(*) as monthly_new_patient_cnt,
             ROUND(COUNT(*)::numeric / mt.total_monthly_cnt * 100, 2) as monthly_pct_of_total
-        FROM silver_ops.fact_new_patient_intake f
+        FROM silver_ops.referrals f
         INNER JOIN monthly_totals mt 
             ON f.client_id = mt.client_id 
             AND f.practice_id = mt.practice_id 
             AND f.time_period_id = mt.time_period_id
-        WHERE f.client_id = CAST(:client_id AS uuid) AND f.practice_id = CAST(:practice_id AS uuid)
+        WHERE f.client_id = CAST(:client_id AS uuid) 
+            AND f.practice_id = CAST(:practice_id AS uuid)
+            AND f.is_new_patient = TRUE
         GROUP BY f.client_id, f.practice_id, f.time_period_id, f.referral_category, mt.total_monthly_cnt
     ),
     name_breakdown AS (
@@ -334,12 +429,14 @@ def aggregate_to_gold_breakdown(connection, client_id, practice_id):
             f.referral_category,
             COUNT(*) as monthly_new_patient_cnt,
             ROUND(COUNT(*)::numeric / mt.total_monthly_cnt * 100, 2) as monthly_pct_of_total
-        FROM silver_ops.fact_new_patient_intake f
+        FROM silver_ops.referrals f
         INNER JOIN monthly_totals mt 
             ON f.client_id = mt.client_id 
             AND f.practice_id = mt.practice_id 
             AND f.time_period_id = mt.time_period_id
-        WHERE f.client_id = CAST(:client_id AS uuid) AND f.practice_id = CAST(:practice_id AS uuid)
+        WHERE f.client_id = CAST(:client_id AS uuid) 
+            AND f.practice_id = CAST(:practice_id AS uuid)
+            AND f.is_new_patient = TRUE
         GROUP BY f.client_id, f.practice_id, f.time_period_id, f.referral_name, f.referral_category, mt.total_monthly_cnt
     )
     SELECT * FROM category_breakdown
@@ -350,29 +447,33 @@ def aggregate_to_gold_breakdown(connection, client_id, practice_id):
     
     result = connection.execute(text(breakdown_sql), {'client_id': client_id, 'practice_id': practice_id})
     rows_inserted = result.rowcount
-    connection.commit()
     
     logger.info(f"✅ Inserted {rows_inserted} rows into gold_ops.referrals_monthly_breakdown")
     return rows_inserted
 
 def run_etl_pipeline(client_name='Wall Street Orthodontics'):
     """Run the complete ETL pipeline"""
-    logger.info("🚀 Starting ETL Pipeline...")
+    logger.info("🚀 Starting Referrals ETL Pipeline...")
+    
+    # Log the ETL configuration being applied
+    min_date = get_client_etl_config(client_name)
+    logger.info(f"📋 ETL config for {client_name}: min_appointment_date = {min_date}")
     
     engine = get_engine()
     
-    with engine.connect() as connection:
+    with engine.begin() as connection:
         # Get or create client and practice
         client_id = get_client_id(connection, client_name)
         practice_id = get_practice_id(connection, client_id)
         
-        # Ensure supporting data exists
+        # Ensure supporting data and tables exist
+        ensure_silver_table_exists(connection)
         ensure_time_periods(connection)
         create_appointment_type_mappings(connection, client_id)
         create_referral_category_mappings(connection, client_id)
         
         # Run ETL transformations
-        silver_rows = extract_transform_to_silver(connection, client_id, practice_id)
+        silver_rows = extract_transform_to_silver(connection, client_id, practice_id, client_name)
         
         if silver_rows > 0:
             summary_rows = aggregate_to_gold_summary(connection, client_id, practice_id)

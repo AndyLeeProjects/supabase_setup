@@ -14,6 +14,14 @@ from cache_func import (
     refresh_etl_data_cache, refresh_all_caches, setup_auto_refresh, setup_sidebar_cache_controls
 )
 
+# Import ETL configuration
+try:
+    from etl_pipeline import CLIENT_ETL_CONFIG, get_client_etl_config
+except ImportError:
+    CLIENT_ETL_CONFIG = {}
+    def get_client_etl_config(client_name):
+        return '2020-01-01'
+
 st.set_page_config(
     page_title="ETL Pipeline", 
     layout="wide",
@@ -22,6 +30,20 @@ st.set_page_config(
 
 def get_db_connection():
     return get_engine()
+
+def table_exists(engine, schema, table_name):
+    """Check if a table exists in the database"""
+    try:
+        query = text(f"""
+            SELECT EXISTS(
+                SELECT 1 FROM pg_tables
+                WHERE schemaname = :schema AND tablename = :table
+            ) as exists
+        """)
+        result = pd.read_sql(query, engine, params={'schema': schema, 'table': table_name})
+        return result.iloc[0, 0]
+    except:
+        return False
 
 def get_clients():
     """Get list of clients for selection using cache"""
@@ -92,18 +114,18 @@ def get_current_silver_gold_status(client_id=None):
     if status and 'silver' in status:
         # Calculate total silver facts
         silver_facts = sum([
-            status['silver'].get('fact_new_patient_intake', {}).get('count', 0),
+            status['silver'].get('referrals', {}).get('count', 0),
             status['silver'].get('fact_patient_treatments', {}).get('count', 0),
             status['silver'].get('fact_referrals', {}).get('count', 0)
         ])
         
-        # Get earliest and latest intake dates (from fact_new_patient_intake)
-        intake_table = status['silver'].get('fact_new_patient_intake', {})
+        # Get earliest and latest appointment dates (from referrals)
+        referrals_table = status['silver'].get('referrals', {})
         
         silver_status = {
             'silver_facts': silver_facts,
-            'earliest_intake': intake_table.get('last_updated'),  # This might need adjustment based on actual data structure
-            'latest_intake': intake_table.get('last_updated')     # This might need adjustment based on actual data structure
+            'earliest_date': referrals_table.get('earliest_date'),
+            'latest_date': referrals_table.get('latest_date')
         }
     
     if status and 'gold' in status:
@@ -124,6 +146,10 @@ def get_current_silver_gold_status(client_id=None):
 def run_etl_with_logging(client_name):
     """Run ETL pipeline with detailed logging"""
     try:
+        # Force reload to get fresh code (not cached bytecode)
+        import importlib
+        import etl_pipeline
+        importlib.reload(etl_pipeline)
         from etl_pipeline import run_etl_pipeline
         
         # Get before status
@@ -173,191 +199,75 @@ def main():
     # Setup sidebar cache controls
     setup_sidebar_cache_controls()
 
-    # Client Selection Section
-    st.subheader("Client Selection")
-    
+    # Get clients for processing
     clients_df = get_clients()
     
     if clients_df.empty:
         st.warning("No clients found. Please add clients in the Master Data page first.")
         return
     
-    client_options = ["All Clients"] + clients_df['name'].tolist()
-    selected_client = st.selectbox(
-        "Select client for ETL processing:",
-        client_options,
-        help="Choose a specific client or process all clients"
-    )
+    # Default to first client for ETL operations
+    selected_client = clients_df['name'].iloc[0] if not clients_df.empty else None
     
-    # Show client info
-    if selected_client != "All Clients":
-        client_row = clients_df[clients_df['name'] == selected_client].iloc[0]
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.info(f"**Client ID:** {client_row['id']}")
-        with col2:
-            st.info(f"**Created:** {client_row['created_at'].strftime('%Y-%m-%d')}")
-
-    # Bronze Data Status Section
-    st.subheader("Available Data")
-    
-    # Use fast bronze data detection
+    # Check bronze data status (silent check for ETL validation)
     bronze_status = get_bronze_data_status_fast(selected_client)
-    
-    # Extract status for each data type
     appointments_status = bronze_status.get('appointments', {})
     referrals_status = bronze_status.get('referrals', {})
     
-    # Simple metrics
-    col1, col2 = st.columns(2)
+    # Get client_id for ETL operations
+    client_id = clients_df['id'].iloc[0]
     
-    with col1:
-        appt_count = appointments_status.get('total_appointments', 0)
-        st.metric("Appointments", f"{appt_count:,}")
-    
-    with col2:
-        ref_count = referrals_status.get('total_referrals', 0)
-        st.metric("Referrals", f"{ref_count:,}")
-    
-    # Show transformation flow
-    st.markdown("---")
-    st.subheader("Data Transformation Flow")
-    
-    flow1, arrow1, flow2, arrow2, flow3 = st.columns([3, 0.5, 3, 0.5, 3])
-    
-    with flow1:
+    # Show ETL Configuration Info
+    with st.expander("⚙️ Referrals ETL Configuration", expanded=False):
         st.markdown("""
-        <div style="background-color: #fff4e6; padding: 20px; border-radius: 10px; text-align: center; border: 3px solid #ff9800; height: 120px; display: flex; flex-direction: column; justify-content: center;">
-            <div style="font-size: 2em; margin: 0;">📋</div>
-            <div style="margin: 5px 0; font-size: 1.1em; font-weight: 600;">Bronze</div>
-            <div style="margin: 0; font-size: 0.85em; color: #666;">Raw source data</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with arrow1:
-        st.markdown("<div style='text-align: center; line-height: 120px; font-size: 2em;'>→</div>", unsafe_allow_html=True)
-    
-    with flow2:
-        st.markdown("""
-        <div style="background-color: #f0f0f0; padding: 20px; border-radius: 10px; text-align: center; border: 3px solid #9e9e9e; height: 120px; display: flex; flex-direction: column; justify-content: center;">
-            <div style="font-size: 2em; margin: 0;">⚙️</div>
-            <div style="margin: 5px 0; font-size: 1.1em; font-weight: 600;">Silver</div>
-            <div style="margin: 0; font-size: 0.85em; color: #666;">Standardized facts</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with arrow2:
-        st.markdown("<div style='text-align: center; line-height: 120px; font-size: 2em;'>→</div>", unsafe_allow_html=True)
-    
-    with flow3:
-        st.markdown("""
-        <div style="background-color: #fff9c4; padding: 20px; border-radius: 10px; text-align: center; border: 3px solid #fbc02d; height: 120px; display: flex; flex-direction: column; justify-content: center;">
-            <div style="font-size: 2em; margin: 0;">📊</div>
-            <div style="margin: 5px 0; font-size: 1.1em; font-weight: 600;">Gold</div>
-            <div style="margin: 0; font-size: 0.85em; color: #666;">Aggregated metrics</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("")
-    
-    # Current processed data status
-    st.subheader("Current Processed Data")
-    
-    client_id = None
-    if selected_client != "All Clients":
-        client_id = clients_df[clients_df['name'] == selected_client].iloc[0]['id']
-    
-    silver_status, summary_status, breakdown_status = get_current_silver_gold_status(client_id)
-    
-    if silver_status and silver_status['silver_facts'] > 0:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Silver Facts", f"{silver_status['silver_facts']:,}")
-        with col2:
-            st.metric("Gold Summaries", f"{summary_status['summary_records']:,}")
-        with col3:
-            st.metric("Gold Breakdowns", f"{breakdown_status['breakdown_records']:,}")
+        ### How to Configure Referrals Pipeline Date Filters
         
-        # Show sample output tables
-        with st.expander("View Gold Metrics Sample", expanded=False):
-            engine = get_db_connection()
-            
-            # Show gold summaries
-            try:
-                query = text("""
-                SELECT 
-                    c.name as client_name,
-                    tp.label as month,
-                    s.monthly_new_patient_cnt as monthly_count,
-                    ROUND(s.l3m_avg_new_patient_cnt, 1) as l3m_avg,
-                    ROUND(s.variance_from_l3m * 100, 1) as var_pct,
-                    s.ytd_new_patient_cnt as ytd_count
-                FROM gold_ops.referrals_monthly_summary s
-                JOIN master.clients c ON s.client_id = c.id
-                JOIN master.time_periods tp ON s.time_period_id = tp.id
-                ORDER BY tp.start_date DESC
-                LIMIT 10
-                """)
-                summary_sample = pd.read_sql(query, engine)
-                
-                if not summary_sample.empty:
-                    st.markdown("**Monthly Summary:**")
-                    st.dataframe(summary_sample, use_container_width=True, hide_index=True)
-            except Exception as e:
-                st.warning(f"Could not load summary: {e}")
-            
-            # Show gold breakdowns
-            try:
-                query = text("""
-                SELECT 
-                    c.name as client_name,
-                    tp.label as month,
-                    b.referral_category as category,
-                    b.breakdown_value as source,
-                    b.monthly_new_patient_cnt as count,
-                    ROUND(b.monthly_pct_of_total, 1) as pct_total
-                FROM gold_ops.referrals_monthly_breakdown b
-                JOIN master.clients c ON b.client_id = c.id
-                JOIN master.time_periods tp ON b.time_period_id = tp.id
-                WHERE b.breakdown_type = 'referral_name'
-                ORDER BY tp.start_date DESC, b.monthly_new_patient_cnt DESC
-                LIMIT 15
-                """)
-                breakdown_sample = pd.read_sql(query, engine)
-                
-                if not breakdown_sample.empty:
-                    st.markdown("**Breakdown by Source:**")
-                    st.dataframe(breakdown_sample, use_container_width=True, hide_index=True)
-            except Exception as e:
-                st.warning(f"Could not load breakdown: {e}")
-    else:
-        st.info("No processed data. Run ETL pipeline below to transform data.")
+        The referrals ETL pipeline can filter appointments by date per client. 
+        Edit `CLIENT_ETL_CONFIG` in [`src/etl_pipeline.py`](../src/etl_pipeline.py) to customize.
+        
+        **Configuration Option:**
+        - `min_appointment_date`: Only process appointments from this date onwards
+        
+        **Example:**
+        ```python
+        CLIENT_ETL_CONFIG = {
+            'Wall Street Orthodontics': {
+                'min_appointment_date': '2025-01-01'
+            },
+            'Another Client': {
+                'min_appointment_date': '2024-01-01'
+            }
+        }
+        ```
+        
+        **Current Configurations:**
+        """)
+        
+        if CLIENT_ETL_CONFIG:
+            config_data = []
+            for client_name, config in CLIENT_ETL_CONFIG.items():
+                config_data.append({
+                    'Client': client_name,
+                    'Appointment Date Filter': f"{config.get('min_appointment_date', 'Not set')} onwards"
+                })
+            config_df = pd.DataFrame(config_data)
+            st.dataframe(config_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("No client-specific configurations set. All clients use default settings (2020-01-01 onwards).")
     
     # Data Transformation Explorer
-    st.markdown("---")
     st.subheader("Explore Data Transformation")
     st.markdown("View how data transforms through each layer from Bronze → Silver → Gold")
     
-    explore_col1, explore_col2 = st.columns(2)
-    
-    with explore_col1:
-        explore_client = st.selectbox(
-            "Select Client",
-            options=clients_df['name'].tolist(),
-            key="explore_client"
-        )
-    
-    with explore_col2:
-        explore_data_type = st.selectbox(
-            "Select Data Type",
-            options=["Referrals", "Appointments"],
-            key="explore_data_type"
-        )
+    explore_data_type = st.selectbox(
+        "Select Data Type",
+        options=["Referrals", "Appointments"],
+        key="explore_data_type"
+    )
     
     if st.button("Show Transformation", type="primary"):
-        explore_client_id = clients_df[clients_df['name'] == explore_client].iloc[0]['id']
-        explore_client_slug = clients_df[clients_df['name'] == explore_client].iloc[0].get('slug', explore_client.lower().replace(' ', '_'))
+        explore_client_id = clients_df.iloc[0]['id']
+        explore_client_slug = clients_df.iloc[0].get('slug', clients_df.iloc[0]['name'].lower().replace(' ', '_'))
         
         # Determine bronze suffix (same logic as Home page)
         if 'wall_street' in explore_client_slug or 'wso' in explore_client_slug:
@@ -367,188 +277,405 @@ def main():
         
         engine = get_db_connection()
         
-        # Bronze Layer Sample
-        with st.expander("🥉 Bronze Layer - Raw Data", expanded=True):
-            st.markdown(f"**Source:** `bronze_ops.{explore_data_type.lower()}_raw_{bronze_suffix}`")
+        # Bronze Layer - Show all source tables
+        with st.expander("🥉 Bronze Layer - Raw Data Sources", expanded=True):
+            st.markdown("### Source Tables Used for Silver Layer")
+            st.markdown("""
+            The silver layer combines data from multiple bronze and master tables:            
+            - **Bronze Tables**: Raw operational data from source systems
+            - **Master Tables**: Reference data for standardization and mapping
+            """)
+            
+            # Get row counts dynamically
+            table_info = []
+            try:
+                # Appointments table
+                appt_count = pd.read_sql(f"SELECT COUNT(*) as cnt FROM bronze_ops.appointments_raw_{bronze_suffix}", engine).iloc[0]['cnt']
+                table_info.append({
+                    'Table': f'bronze_ops.appointments_raw_{bronze_suffix}',
+                    'Type': 'Bronze',
+                    'Rows': f'{appt_count:,}',
+                    'Purpose': 'Main appointment records with patient info'
+                })
+            except:
+                table_info.append({
+                    'Table': f'bronze_ops.appointments_raw_{bronze_suffix}',
+                    'Type': 'Bronze',
+                    'Rows': '0',
+                    'Purpose': 'Main appointment records with patient info'
+                })
             
             try:
-                if explore_data_type == "Referrals":
-                    bronze_query = text(f"""
-                        SELECT *
-                        FROM bronze_ops.referrals_raw_{bronze_suffix}
-                        LIMIT 10
-                    """)
-                else:
-                    bronze_query = text(f"""
-                        SELECT *
+                # Referrals table
+                ref_count = pd.read_sql(f"SELECT COUNT(*) as cnt FROM bronze_ops.referrals_raw_{bronze_suffix}", engine).iloc[0]['cnt']
+                table_info.append({
+                    'Table': f'bronze_ops.referrals_raw_{bronze_suffix}',
+                    'Type': 'Bronze',
+                    'Rows': f'{ref_count:,}',
+                    'Purpose': 'Referral source information per patient'
+                })
+            except:
+                table_info.append({
+                    'Table': f'bronze_ops.referrals_raw_{bronze_suffix}',
+                    'Type': 'Bronze',
+                    'Rows': '0',
+                    'Purpose': 'Referral source information per patient'
+                })
+            
+            # Master tables
+            try:
+                atm_count = pd.read_sql(f"SELECT COUNT(*) as cnt FROM master.appointment_type_mappings WHERE client_id = '{explore_client_id}'", engine).iloc[0]['cnt']
+                table_info.append({
+                    'Table': 'master.appointment_type_mappings',
+                    'Type': 'Master',
+                    'Rows': f'{atm_count:,}',
+                    'Purpose': 'Maps appointment types to New Patient category'
+                })
+            except:
+                table_info.append({
+                    'Table': 'master.appointment_type_mappings',
+                    'Type': 'Master',
+                    'Rows': '0',
+                    'Purpose': 'Maps appointment types to New Patient category'
+                })
+            
+            try:
+                rcm_count = pd.read_sql(f"SELECT COUNT(*) as cnt FROM master.client_referral_category_mappings WHERE client_id = '{explore_client_id}'", engine).iloc[0]['cnt']
+                table_info.append({
+                    'Table': 'master.client_referral_category_mappings',
+                    'Type': 'Master',
+                    'Rows': f'{rcm_count:,}',
+                    'Purpose': 'Standardizes referral category names'
+                })
+            except:
+                table_info.append({
+                    'Table': 'master.client_referral_category_mappings',
+                    'Type': 'Master',
+                    'Rows': '0',
+                    'Purpose': 'Standardizes referral category names'
+                })
+            
+            try:
+                tp_count = pd.read_sql("SELECT COUNT(*) as cnt FROM master.time_periods WHERE period_type = 'month'", engine).iloc[0]['cnt']
+                table_info.append({
+                    'Table': 'master.time_periods',
+                    'Type': 'Master',
+                    'Rows': f'{tp_count:,}',
+                    'Purpose': 'Monthly time period definitions for aggregation'
+                })
+            except:
+                table_info.append({
+                    'Table': 'master.time_periods',
+                    'Type': 'Master',
+                    'Rows': '0',
+                    'Purpose': 'Monthly time period definitions for aggregation'
+                })
+            
+            # Display summary table
+            summary_df = pd.DataFrame(table_info)
+            st.dataframe(summary_df, use_container_width=True, hide_index=True)
+            
+            st.markdown("---")
+            st.markdown("### 📋 Table Data Samples")
+            
+            # Expandable sections for each table
+            with st.expander(f"View: bronze_ops.appointments_raw_{bronze_suffix}", expanded=False):
+                try:
+                    bronze_appt_query = text(f"""
+                        SELECT 
+                            patient_id,
+                            patient_id_guid,
+                            appointment_date,
+                            appointment_type_description,
+                            appointment_status_description
                         FROM bronze_ops.appointments_raw_{bronze_suffix}
                         LIMIT 10
                     """)
-                
-                bronze_sample = pd.read_sql(bronze_query, engine)
-                st.dataframe(bronze_sample, use_container_width=True, hide_index=True, height=300)
-                st.caption(f"Showing 10 of {len(bronze_sample)} raw records")
-            except Exception as e:
-                st.warning(f"No bronze data available: {e}")
+                    bronze_appt = pd.read_sql(bronze_appt_query, engine)
+                    st.dataframe(bronze_appt, use_container_width=True, hide_index=True)
+                    st.caption(f"Showing 10 of {appt_count:,} records")
+                except Exception as e:
+                    st.warning(f"No data available: {e}")
+            
+            with st.expander(f"View: bronze_ops.referrals_raw_{bronze_suffix}", expanded=False):
+                try:
+                    bronze_ref_query = text(f"""
+                        SELECT 
+                            patient_id_guid,
+                            referred_in_by_type_description,
+                            referred_in_by_first_name,
+                            referred_in_by_last_name
+                        FROM bronze_ops.referrals_raw_{bronze_suffix}
+                        LIMIT 10
+                    """)
+                    bronze_ref = pd.read_sql(bronze_ref_query, engine)
+                    st.dataframe(bronze_ref, use_container_width=True, hide_index=True)
+                    st.caption(f"Showing 10 of {ref_count:,} records")
+                except Exception as e:
+                    st.warning(f"No data available: {e}")
+            
+            with st.expander("View: master.appointment_type_mappings", expanded=False):
+                try:
+                    atm_query = text(f"""
+                        SELECT 
+                            source_appointment_type,
+                            standardized_category,
+                            start_date,
+                            end_date
+                        FROM master.appointment_type_mappings
+                        WHERE client_id = '{explore_client_id}'
+                        ORDER BY source_appointment_type
+                    """)
+                    atm_data = pd.read_sql(atm_query, engine)
+                    st.dataframe(atm_data, use_container_width=True, hide_index=True)
+                    st.caption(f"Showing all {atm_count:,} mappings for this client")
+                except Exception as e:
+                    st.warning(f"No data available: {e}")
+            
+            with st.expander("View: master.client_referral_category_mappings", expanded=False):
+                try:
+                    rcm_query = text(f"""
+                        SELECT 
+                            raw_referral_category,
+                            canonical_referral_category
+                        FROM master.client_referral_category_mappings
+                        WHERE client_id = '{explore_client_id}'
+                        ORDER BY raw_referral_category
+                    """)
+                    rcm_data = pd.read_sql(rcm_query, engine)
+                    st.dataframe(rcm_data, use_container_width=True, hide_index=True)
+                    st.caption(f"Showing all {rcm_count:,} category mappings for this client")
+                except Exception as e:
+                    st.warning(f"No data available: {e}")
+            
+            with st.expander("View: master.time_periods", expanded=False):
+                try:
+                    tp_query = text("""
+                        SELECT 
+                            label,
+                            start_date,
+                            end_date,
+                            year,
+                            month
+                        FROM master.time_periods
+                        WHERE period_type = 'month'
+                        ORDER BY start_date DESC
+                        LIMIT 12
+                    """)
+                    tp_data = pd.read_sql(tp_query, engine)
+                    st.dataframe(tp_data, use_container_width=True, hide_index=True)
+                    st.caption(f"Showing 12 most recent of {tp_count:,} monthly periods")
+                except Exception as e:
+                    st.warning(f"No data available: {e}")
         
         # Silver Layer Sample
         with st.expander("🥈 Silver Layer - Standardized Facts", expanded=True):
-            st.markdown("**Target:** `silver_ops.fact_new_patient_intake`")
+            st.markdown("### Target Table: `silver_ops.referrals`")
             
-            try:
-                silver_query = text(f"""
-                    SELECT 
-                        f.intake_date,
-                        f.patient_id,
-                        f.referral_category,
-                        f.referral_name as referral_source,
-                        p.name as practice_name,
-                        f.created_at
-                    FROM silver_ops.fact_new_patient_intake f
-                    LEFT JOIN master.practices p ON f.practice_id = p.id
-                    WHERE f.client_id::text = '{explore_client_id}'
-                    ORDER BY f.intake_date DESC
-                    LIMIT 10
-                """)
-                
-                silver_sample = pd.read_sql(silver_query, engine)
-                
-                if not silver_sample.empty:
-                    st.dataframe(silver_sample, use_container_width=True, hide_index=True, height=300)
-                    st.caption(f"Showing 10 most recent patient intake records")
-                else:
-                    st.info("No silver layer data. Run ETL pipeline to process bronze data.")
-            except Exception as e:
-                st.warning(f"Error loading silver data: {e}")
+            st.markdown("""
+            **Transformation Logic:**
+            - **Grain**: One row per unique patient (patient_id_guid)
+            - **Selection**: Earliest appointment date per patient (DISTINCT ON with ORDER BY)
+            - **Date Filter**: Client-specific minimum date (configured in ETL_CONFIG)
+            
+            **Joins Applied:**
+            1. `appointments_raw` ← LEFT JOIN → `appointment_type_mappings` (for is_new_patient flag)
+            2. `appointments_raw` ← LEFT JOIN → `referrals_raw` (on patient_id_guid)
+            3. `referrals_raw` ← LEFT JOIN → `client_referral_category_mappings` (standardize categories)
+            4. `appointments_raw` ← INNER JOIN → `time_periods` (assign monthly period)
+            
+            **New Columns Created:**
+            - `is_new_patient`: Boolean flag based on appointment_type_mappings
+            - `referral_category`: Standardized category (doctor/patient/non_patient/other/missing)
+            - `referral_name`: Combined first + last name from referrals table
+            - `time_period_id`: Monthly period UUID for aggregation
+            """)
+            
+            # Check if table exists first
+            if not table_exists(engine, 'silver_ops', 'referrals'):
+                st.info("⚠️ Silver table not created yet. Run ETL pipeline to create and populate this table.")
+            else:
+                try:
+                    silver_query = text(f"""
+                        SELECT 
+                            f.appointment_date,
+                            f.patient_id,
+                            f.appointment_type,
+                            f.appointment_status,
+                            f.is_new_patient,
+                            f.referral_category,
+                            f.referral_name as referral_source,
+                            p.name as practice_name,
+                            f.created_at
+                        FROM silver_ops.referrals f
+                        LEFT JOIN master.practices p ON f.practice_id = p.id
+                        WHERE f.client_id::text = '{explore_client_id}'
+                        ORDER BY f.appointment_date DESC
+                    """)
+                    
+                    silver_sample = pd.read_sql(silver_query, engine)
+                    
+                    if not silver_sample.empty:
+                        st.dataframe(silver_sample, use_container_width=True, hide_index=True, height=600)
+                        st.caption(f"Showing all {len(silver_sample)} appointments")
+                    else:
+                        st.info("No silver layer data. Run ETL pipeline to process bronze data.")
+                except Exception as e:
+                    st.error(f"Error loading silver data: {str(e)}")
         
         # Gold Layer Metrics
         with st.expander("🥇 Gold Layer - Analytics Metrics", expanded=True):
-            st.markdown("**Aggregated monthly referral metrics with breakdowns**")
+            st.markdown("### Target Tables: `gold_ops.referrals_monthly_summary` & `gold_ops.referrals_monthly_breakdown`")
             
-            try:
-                # Get monthly summary with date filter (2025 onwards)
-                summary_query = text(f"""
-                    SELECT 
-                        tp.label as month,
-                        tp.start_date,
-                        s.monthly_new_patient_cnt as monthly_count,
-                        s.l3m_avg_new_patient_cnt as l3m_average,
-                        ROUND(s.variance_from_l3m * 100, 2) as variance_pct,
-                        s.ytd_new_patient_cnt as ytd_total
-                    FROM gold_ops.referrals_monthly_summary s
-                    JOIN master.time_periods tp ON s.time_period_id = tp.id
-                    WHERE s.client_id::text = '{explore_client_id}'
-                        AND tp.start_date >= '2025-01-01'
-                        AND tp.period_type = 'month'
-                    ORDER BY tp.start_date
-                """)
-                
-                gold_summary = pd.read_sql(summary_query, engine)
-                
-                if not gold_summary.empty:
-                    # Create Overview section
-                    st.markdown("### 📊 Overview")
-                    
-                    # Transpose for month columns
-                    overview_data = pd.DataFrame({
-                        'Metric': ['New Patient Count', 'L3M Avg', 'Variance from L3M', 'Total 2025']
-                    })
-                    
-                    for _, row in gold_summary.iterrows():
-                        month_label = row['month']
-                        overview_data[month_label] = [
-                            int(row['monthly_count']),
-                            f"{row['l3m_average']:.1f}" if pd.notna(row['l3m_average']) else '',
-                            f"{row['variance_pct']:.0f}%" if pd.notna(row['variance_pct']) else '',
-                            ''
-                        ]
-                    
-                    # Add total 2025 in last column
-                    if len(gold_summary) > 0:
-                        overview_data.iloc[3, -1] = int(gold_summary['ytd_total'].iloc[-1])
-                    
-                    st.dataframe(overview_data.set_index('Metric'), use_container_width=True)
-                    
-                    st.markdown("---")
-                    
-                    # Get detailed breakdown with date filter
-                    breakdown_query = text(f"""
+            st.markdown("""
+            **Aggregation Logic:**
+            
+            **Summary Table** (`referrals_monthly_summary`):
+            - **Grain**: One row per client/practice/month
+            - **Metrics Calculated**:
+              - `monthly_new_patient_cnt`: COUNT of new patients in the month
+              - `l3m_avg_new_patient_cnt`: Rolling 3-month average (LAG window function)
+              - `variance_from_l3m`: (current - L3M avg) / L3M avg
+              - `ytd_new_patient_cnt`: Year-to-date cumulative sum
+            - **Source**: `silver_ops.referrals` WHERE is_new_patient = TRUE
+            
+            **Breakdown Table** (`referrals_monthly_breakdown`):
+            - **Grain**: One row per client/practice/month/breakdown_type/breakdown_value
+            - **Breakdown Types**:
+              - `referral_category`: Groups by doctor/patient/non_patient/other
+              - `referral_name`: Individual referral source names
+            - **Metrics**: Monthly count + percentage of total for the month
+            - **Source**: `silver_ops.referrals` WHERE is_new_patient = TRUE, grouped by dimension
+            """)
+            
+            # Check if gold tables exist first
+            if not table_exists(engine, 'gold_ops', 'referrals_monthly_summary'):
+                st.info("⚠️ Gold tables not created yet. Run ETL pipeline to create and populate these tables.")
+            else:
+                try:
+                    # Get monthly summary with date filter (2025 onwards)
+                    summary_query = text(f"""
                         SELECT 
                             tp.label as month,
                             tp.start_date,
-                            b.breakdown_value as source,
-                            b.monthly_new_patient_cnt as count,
-                            ROUND(b.monthly_pct_of_total, 1) as pct_of_total
-                        FROM gold_ops.referrals_monthly_breakdown b
-                        JOIN master.time_periods tp ON b.time_period_id = tp.id
-                        WHERE b.client_id::text = '{explore_client_id}'
-                            AND b.breakdown_type = 'referral_name'
+                            s.monthly_new_patient_cnt as monthly_count,
+                            s.l3m_avg_new_patient_cnt as l3m_average,
+                            ROUND(s.variance_from_l3m * 100, 2) as variance_pct,
+                            s.ytd_new_patient_cnt as ytd_total
+                        FROM gold_ops.referrals_monthly_summary s
+                        JOIN master.time_periods tp ON s.time_period_id = tp.id
+                        WHERE s.client_id::text = '{explore_client_id}'
                             AND tp.start_date >= '2025-01-01'
                             AND tp.period_type = 'month'
-                        ORDER BY tp.start_date, b.monthly_new_patient_cnt DESC
+                        ORDER BY tp.start_date
                     """)
                     
-                    gold_breakdown = pd.read_sql(breakdown_query, engine)
+                    gold_summary = pd.read_sql(summary_query, engine)
                     
-                    if not gold_breakdown.empty:
-                        st.markdown("### 📋 Detailed Source Breakdown")
+                    if not gold_summary.empty:
+                        # Create Overview section
+                        st.markdown("### 📊 Overview")
                         
-                        # Get unique sources and months
-                        sources = gold_breakdown['source'].unique()
-                        months = gold_summary['month'].tolist()
+                        # Transpose for month columns
+                        overview_data = pd.DataFrame({
+                            'Metric': ['New Patient Count', 'L3M Avg', 'Variance from L3M', 'Total 2025']
+                        })
                         
-                        # Create breakdown table with counts and percentages
-                        breakdown_display = []
+                        for _, row in gold_summary.iterrows():
+                            month_label = row['month']
+                            overview_data[month_label] = [
+                                int(row['monthly_count']),
+                                f"{row['l3m_average']:.1f}" if pd.notna(row['l3m_average']) else '',
+                                f"{row['variance_pct']:.0f}%" if pd.notna(row['variance_pct']) else '',
+                                ''
+                            ]
                         
-                        for source in sources:
-                            # Count row
-                            count_row = {'Source': source, 'Metric': 'Count'}
-                            pct_row = {'Source': '', 'Metric': '% Total'}
+                        # Add total 2025 in last column
+                        if len(gold_summary) > 0:
+                            overview_data.iloc[3, -1] = int(gold_summary['ytd_total'].iloc[-1])
+                        
+                        st.dataframe(overview_data.set_index('Metric'), use_container_width=True)
+                        
+                        st.markdown("---")
+                        
+                        # Get detailed breakdown with date filter
+                        breakdown_query = text(f"""
+                            SELECT 
+                                tp.label as month,
+                                tp.start_date,
+                                b.breakdown_value as source,
+                                b.monthly_new_patient_cnt as count,
+                                ROUND(b.monthly_pct_of_total, 1) as pct_of_total
+                            FROM gold_ops.referrals_monthly_breakdown b
+                            JOIN master.time_periods tp ON b.time_period_id = tp.id
+                            WHERE b.client_id::text = '{explore_client_id}'
+                                AND b.breakdown_type = 'referral_name'
+                                AND tp.start_date >= '2025-01-01'
+                                AND tp.period_type = 'month'
+                            ORDER BY tp.start_date, b.monthly_new_patient_cnt DESC
+                        """)
+                        
+                        gold_breakdown = pd.read_sql(breakdown_query, engine)
+                        
+                        if not gold_breakdown.empty:
+                            st.markdown("### 📋 Detailed Source Breakdown")
                             
-                            for month in months:
-                                month_data = gold_breakdown[
-                                    (gold_breakdown['source'] == source) & 
-                                    (gold_breakdown['month'] == month)
-                                ]
+                            # Get unique sources and months
+                            sources = gold_breakdown['source'].unique()
+                            months = gold_summary['month'].tolist()
+                            
+                            # Create breakdown table with counts and percentages
+                            breakdown_display = []
+                            
+                            for source in sources:
+                                # Count row
+                                count_row = {'Source': source, 'Metric': 'Count'}
+                                pct_row = {'Source': '', 'Metric': '% Total'}
                                 
-                                if not month_data.empty:
-                                    count_row[month] = int(month_data.iloc[0]['count'])
-                                    pct_row[month] = f"{month_data.iloc[0]['pct_of_total']}%"
-                                else:
-                                    count_row[month] = 0
-                                    pct_row[month] = "0%"
+                                for month in months:
+                                    month_data = gold_breakdown[
+                                        (gold_breakdown['source'] == source) & 
+                                        (gold_breakdown['month'] == month)
+                                    ]
+                                    
+                                    if not month_data.empty:
+                                        count_row[month] = int(month_data.iloc[0]['count'])
+                                        pct_row[month] = f"{month_data.iloc[0]['pct_of_total']}%"
+                                    else:
+                                        count_row[month] = 0
+                                        pct_row[month] = "0%"
+                                
+                                breakdown_display.append(count_row)
+                                breakdown_display.append(pct_row)
                             
-                            breakdown_display.append(count_row)
-                            breakdown_display.append(pct_row)
-                        
-                        # Add totals row
-                        total_row = {'Source': 'Total', 'Metric': ''}
-                        for month in months:
-                            month_total = gold_breakdown[gold_breakdown['month'] == month]['count'].sum()
-                            total_row[month] = int(month_total)
-                        breakdown_display.append(total_row)
-                        
-                        # Convert to DataFrame and display
-                        breakdown_df = pd.DataFrame(breakdown_display)
-                        
-                        # Style the dataframe
-                        def highlight_totals(row):
-                            if row['Source'] == 'Total':
-                                return ['background-color: #f0f0f0; font-weight: bold'] * len(row)
-                            elif row['Metric'] == 'Count':
-                                return ['font-weight: 600'] + [''] * (len(row) - 1)
-                            else:
-                                return ['color: #666; font-size: 0.9em'] + ['color: #666; font-size: 0.9em'] * (len(row) - 1)
-                        
-                        styled_df = breakdown_df.style.apply(highlight_totals, axis=1)
-                        st.dataframe(styled_df, use_container_width=True, hide_index=True)
-                        
+                            # Add totals row
+                            total_row = {'Source': 'Total', 'Metric': ''}
+                            for month in months:
+                                month_total = gold_breakdown[gold_breakdown['month'] == month]['count'].sum()
+                                total_row[month] = int(month_total)
+                            breakdown_display.append(total_row)
+                            
+                            # Convert to DataFrame and display
+                            breakdown_df = pd.DataFrame(breakdown_display)
+                            
+                            # Style the dataframe
+                            def highlight_totals(row):
+                                if row['Source'] == 'Total':
+                                    return ['background-color: #f0f0f0; font-weight: bold'] * len(row)
+                                elif row['Metric'] == 'Count':
+                                    return ['font-weight: 600'] + [''] * (len(row) - 1)
+                                else:
+                                    return ['color: #666; font-size: 0.9em'] + ['color: #666; font-size: 0.9em'] * (len(row) - 1)
+                            
+                            styled_df = breakdown_df.style.apply(highlight_totals, axis=1)
+                            st.dataframe(styled_df, use_container_width=True, hide_index=True)
+                            
+                        else:
+                            st.info("No breakdown data available for 2025")
                     else:
-                        st.info("No breakdown data available for 2025")
-                else:
-                    st.info("No gold layer metrics for 2025. Run ETL pipeline to generate analytics.")
-            except Exception as e:
-                st.warning(f"Error loading gold metrics: {e}")
+                        st.info("No gold layer metrics for 2025. Run ETL pipeline to generate analytics.")
+                except Exception as e:
+                    st.error(f"Error loading gold metrics: {str(e)}")
     
     # ETL execution section
     st.markdown("---")
@@ -563,10 +690,10 @@ def main():
         **This ETL pipeline performs the following transformations:**
         
         **Bronze → Silver:**
-        - Extracts new patient appointments from bronze layer
-        - Identifies first appointments per patient using appointment type mappings
+        - Extracts all appointments from bronze layer
+        - Marks appointments as "New Patient" using appointment type mappings
         - Joins with referral data to get referral sources
-        - Creates canonical facts in `silver_ops.fact_new_patient_intake`
+        - Creates combined appointments + referrals facts in `silver_ops.referrals`
         
         **Silver → Gold:**
         - Aggregates silver facts into monthly summaries with variance analysis
@@ -621,6 +748,10 @@ def main():
             with step_container:
                 st.markdown("**Step 1: Analyzing current state**")
                 step1_status = st.empty()
+                
+                # Show ETL config being applied
+                min_date = get_client_etl_config(selected_client)
+                st.info(f"🔧 Applying referrals ETL config: Appointment date filter = `{min_date}` onwards")
                 
                 step1_status.text("Checking existing silver/gold data...")
                 before_silver, before_summary, before_breakdown = get_current_silver_gold_status(client_id)
@@ -704,6 +835,7 @@ def main():
                     )
                 
                 # Duplicate prevention info
+                min_date_applied = get_client_etl_config(selected_client)
                 with st.expander("Data Quality Assurance"):
                     st.markdown(f"""
                     **Duplicate Prevention Measures:**
@@ -711,6 +843,9 @@ def main():
                     - ✅ Existing data cleared before reprocessing (idempotent operation)
                     - ✅ Foreign key constraints ensure data integrity
                     - ✅ Client/practice isolation prevents cross-contamination
+                    
+                    **Referrals ETL Filter Applied:**
+                    - Appointment Date: `{min_date_applied}` onwards
                     
                     **Execution Details:**
                     - Start Time: {start_time.strftime('%Y-%m-%d %H:%M:%S')}

@@ -59,7 +59,7 @@ def get_client_table_details(client_slug, bronze_suffix):
 
         bronze_ops_tables = ['appointments_raw', 'patients_raw', 'referrals_raw', 'treatments_raw']
         bronze_fin_tables = ['aging_accounts_raw', 'ledger_transactions_raw']
-        silver_tables = ['fact_new_patient_intake']
+        silver_tables = ['referrals']
         gold_tables = ['referrals_monthly_summary', 'referrals_monthly_breakdown']
 
         result = {'bronze': [], 'silver': [], 'gold': []}
@@ -88,26 +88,54 @@ def get_client_table_details(client_slug, bronze_suffix):
         if not client_id.empty:
             cid = client_id.iloc[0, 0]
             for table_name in silver_tables:
-                has_data = pd.read_sql(text(f"""
-                    SELECT EXISTS(
-                        SELECT 1 FROM silver_ops.{table_name} WHERE client_id = '{cid}' LIMIT 1
-                    ) as exists
-                """), engine).iloc[0, 0]
-                result['silver'].append({'name': table_name, 'exists': has_data})
+                if table_exists(engine, 'silver_ops', table_name):
+                    has_data = pd.read_sql(text(f"""
+                        SELECT EXISTS(
+                            SELECT 1 FROM silver_ops.{table_name} WHERE client_id = '{cid}' LIMIT 1
+                        ) as exists
+                    """), engine).iloc[0, 0]
+                    result['silver'].append({'name': table_name, 'exists': has_data})
+                else:
+                    result['silver'].append({'name': table_name, 'exists': False})
 
             for table_name in gold_tables:
-                has_data = pd.read_sql(text(f"""
-                    SELECT EXISTS(
-                        SELECT 1 FROM gold_ops.{table_name} WHERE client_id = '{cid}' LIMIT 1
-                    ) as exists
-                """), engine).iloc[0, 0]
-                result['gold'].append({'name': table_name, 'exists': has_data})
+                if table_exists(engine, 'gold_ops', table_name):
+                    has_data = pd.read_sql(text(f"""
+                        SELECT EXISTS(
+                            SELECT 1 FROM gold_ops.{table_name} WHERE client_id = '{cid}' LIMIT 1
+                        ) as exists
+                    """), engine).iloc[0, 0]
+                    result['gold'].append({'name': table_name, 'exists': has_data})
+                else:
+                    result['gold'].append({'name': table_name, 'exists': False})
 
         return result
 
     except Exception as e:
         st.error(f"Error getting table details: {e}")
         return {'bronze': [], 'silver': [], 'gold': []}
+
+def table_exists(engine, schema, table_name):
+    """Check if a table exists in the database"""
+    try:
+        query = text(f"""
+            SELECT EXISTS(
+                SELECT 1 FROM pg_tables
+                WHERE schemaname = :schema AND tablename = :table
+            ) as exists
+        """)
+        result = pd.read_sql(query, engine, params={'schema': schema, 'table': table_name})
+        return result.iloc[0, 0]
+    except:
+        return False
+
+def safe_query(engine, query, default_value=0):
+    """Execute a query safely and return default value if it fails"""
+    try:
+        result = pd.read_sql(query, engine)
+        return result.iloc[0, 0] if len(result) > 0 else default_value
+    except:
+        return default_value
 
 def get_client_health_status():
     """Get data health status for each client across all layers"""
@@ -153,62 +181,64 @@ def get_client_health_status():
             ]
 
             for schema, table_name in bronze_table_names:
-                check_query = text(f"""
-                    SELECT EXISTS(
-                        SELECT 1 FROM pg_tables
-                        WHERE schemaname = '{schema}' AND tablename = '{table_name}'
-                    ) as exists
-                """)
-                exists = pd.read_sql(check_query, engine).iloc[0, 0]
-                if exists:
+                if table_exists(engine, schema, table_name):
                     bronze_tables += 1
 
-            # Check silver tables
-            silver_query = text(f"""
-                SELECT COUNT(DISTINCT 'fact_new_patient_intake') as cnt
-                FROM silver_ops.fact_new_patient_intake
-                WHERE client_id::text = '{client_id}'
-            """)
-            silver_count = pd.read_sql(silver_query, engine)['cnt'].iloc[0]
-            silver_tables = 1 if silver_count > 0 else 0
+            # Check silver tables (only if table exists)
+            silver_tables = 0
+            silver_update = None
+            if table_exists(engine, 'silver_ops', 'referrals'):
+                silver_query = text(f"""
+                    SELECT COUNT(*) as cnt
+                    FROM silver_ops.referrals
+                    WHERE client_id::text = '{client_id}'
+                """)
+                silver_count = safe_query(engine, silver_query, 0)
+                silver_tables = 1 if silver_count > 0 else 0
 
-            silver_update_query = text(f"""
-                SELECT MAX(created_at) as max_date
-                FROM silver_ops.fact_new_patient_intake
-                WHERE client_id::text = '{client_id}'
-            """)
-            silver_update = pd.read_sql(silver_update_query, engine)['max_date'].iloc[0]
+                silver_update_query = text(f"""
+                    SELECT MAX(created_at) as max_date
+                    FROM silver_ops.referrals
+                    WHERE client_id::text = '{client_id}'
+                """)
+                silver_update = safe_query(engine, silver_update_query, None)
 
-            # Check gold tables
-            gold_query_1 = text(f"""
-                SELECT COUNT(*) as cnt
-                FROM gold_ops.referrals_monthly_summary
-                WHERE client_id::text = '{client_id}'
-            """)
-            gold_count_1 = pd.read_sql(gold_query_1, engine)['cnt'].iloc[0]
+            # Check gold tables (only if tables exist)
+            gold_tables = 0
+            gold_update_1 = None
+            gold_update_2 = None
+            
+            if table_exists(engine, 'gold_ops', 'referrals_monthly_summary'):
+                gold_query_1 = text(f"""
+                    SELECT COUNT(*) as cnt
+                    FROM gold_ops.referrals_monthly_summary
+                    WHERE client_id::text = '{client_id}'
+                """)
+                gold_count_1 = safe_query(engine, gold_query_1, 0)
+                gold_tables += 1 if gold_count_1 > 0 else 0
 
-            gold_query_2 = text(f"""
-                SELECT COUNT(*) as cnt
-                FROM gold_ops.referrals_monthly_breakdown
-                WHERE client_id::text = '{client_id}'
-            """)
-            gold_count_2 = pd.read_sql(gold_query_2, engine)['cnt'].iloc[0]
+                gold_update_query_1 = text(f"""
+                    SELECT MAX(created_at) as max_date
+                    FROM gold_ops.referrals_monthly_summary
+                    WHERE client_id::text = '{client_id}'
+                """)
+                gold_update_1 = safe_query(engine, gold_update_query_1, None)
 
-            gold_tables = (1 if gold_count_1 > 0 else 0) + (1 if gold_count_2 > 0 else 0)
+            if table_exists(engine, 'gold_ops', 'referrals_monthly_breakdown'):
+                gold_query_2 = text(f"""
+                    SELECT COUNT(*) as cnt
+                    FROM gold_ops.referrals_monthly_breakdown
+                    WHERE client_id::text = '{client_id}'
+                """)
+                gold_count_2 = safe_query(engine, gold_query_2, 0)
+                gold_tables += 1 if gold_count_2 > 0 else 0
 
-            gold_update_query_1 = text(f"""
-                SELECT MAX(created_at) as max_date
-                FROM gold_ops.referrals_monthly_summary
-                WHERE client_id::text = '{client_id}'
-            """)
-            gold_update_1 = pd.read_sql(gold_update_query_1, engine)['max_date'].iloc[0]
-
-            gold_update_query_2 = text(f"""
-                SELECT MAX(created_at) as max_date
-                FROM gold_ops.referrals_monthly_breakdown
-                WHERE client_id::text = '{client_id}'
-            """)
-            gold_update_2 = pd.read_sql(gold_update_query_2, engine)['max_date'].iloc[0]
+                gold_update_query_2 = text(f"""
+                    SELECT MAX(created_at) as max_date
+                    FROM gold_ops.referrals_monthly_breakdown
+                    WHERE client_id::text = '{client_id}'
+                """)
+                gold_update_2 = safe_query(engine, gold_update_query_2, None)
 
             # Determine last update
             last_update = client['client_created']
